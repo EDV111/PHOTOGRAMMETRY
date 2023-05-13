@@ -23,19 +23,21 @@
         background-color: #f7f7f7;
         border: 5px dashed #ccc;
       }
-      #loading-bar-container {
-        display: none;
+      #loading-bar {
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
         height: 10px;
-        background-color: #ddd;
+        background-color: #ccc;
+        z-index: 9999;
+        transition: width 0.2s ease-in-out;
       }
-      #loading-bar {
-        height: 100%;
-        background-color: #4caf50;
-        transition: width 0.1s ease-out;
+      #loading-bar.progress {
+        width: 0;
+      }
+      #loading-bar.complete {
+        width: 100%;
+        background-color: #0f0;
       }
     </style>
   </head>
@@ -43,9 +45,7 @@
     <div id="drop-zone">
       Drag and drop your 3D model file here or click to select a file
     </div>
-    <div id="loading-bar-container">
-      <div id="loading-bar"></div>
-    </div>
+    <div id="loading-bar"></div>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
     <script>
@@ -56,7 +56,6 @@
       document.body.appendChild( renderer.domElement );
       
       const dropZone = document.getElementById('drop-zone');
-      const loadingBar = document.getElementById('loading-bar');
       dropZone.addEventListener('dragover', (event) => {
         event.preventDefault();
         dropZone.style.backgroundColor = '#ccc';
@@ -73,28 +72,34 @@
         reader.onload = () => {
           const content = reader.result;
           const loader = new THREE.GLTFLoader();
-          let loaded = 0, total = 0;
-          loader.parse(content, '', (gltf) => {
-            scene.add(gltf.scene);
-          }, (xhr) => {
-            loaded = xhr.loaded;
-            total = xhr.total;
-            loadingBar.style.width = `${(loaded / total) * 100}%`;
-          }, (error) => {
-            console.error(error);
-          });
-          const animate = function () {
-            requestAnimationFrame( animate );
-            renderer.render( scene, camera );
-          };
-          animate();
-          dropZone.style.display = 'none';
-          document.getElementById('loading-bar-container').style.display = 'block';
+          const progressBar = document.getElementById('loading-bar');
+          loader.load(
+            content,
+            (gltf) => {
+              scene.add(gltf.scene);
+              progressBar.classList.add('complete');
+            },
+            (progress) => {
+              const percentage = progress.loaded / progress.total * 100;
+              progressBar.classList.add('progress');
+              progressBar.style.width = `${percentage}%`;
+            },
+            (error) => {
+              console.error(error);
+            }
+          );
         };
-        reader.readAsArrayBuffer(file);
+        reader.readAsDataURL(file);
       });
       
       camera.position.z = 5;
+      
+      const animate = function () {
+        requestAnimationFrame( animate );
+        renderer.render( scene, camera );
+      };
+      
+      animate();
     </script>
   </body>
 </html>
