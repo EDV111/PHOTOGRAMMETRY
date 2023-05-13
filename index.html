@@ -1,122 +1,292 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>GLB File Upload Example</title>
-	<style>
-		body {
-			background-color: #000;
-			color: #fff;
-			font-family: Arial, sans-serif;
-			margin: 0;
-			padding: 0;
-			text-align: center;
-		}
-		h1 {
-			margin-top: 50px;
-		}
-		#upload-btn {
-			background-color: #fff;
-			border: none;
-			border-radius: 5px;
-			color: #000;
-			cursor: pointer;
-			font-size: 18px;
-			margin-top: 50px;
-			padding: 10px 20px;
-		}
-		#upload-btn:hover {
-			background-color: #eee;
-		}
-		#progress-bar {
-			background-color: #444;
-			border-radius: 5px;
-			height: 20px;
-			margin: 50px auto 0;
-			overflow: hidden;
-			width: 500px;
-		}
-		#progress {
-			background-color: #5cb85c;
-			height: 100%;
-			text-align: center;
-			transition: width 0.3s ease-in-out;
-			width: 0;
-		}
-		canvas {
-			display: block;
-			margin: 50px auto;
-			max-width: 100%;
-		}
-	</style>
-</head>
-<body>
-	<h1>Upload Your GLB File</h1>
-	<input type="file" id="file-input" style="display: none;">
-	<button id="upload-btn">Import</button>
-	<div id="progress-bar">
-		<div id="progress"></div>
-	</div>
-	<canvas id="canvas"></canvas>
-
-	<script>
-		var fileInput = document.getElementById('file-input');
-		var uploadBtn = document.getElementById('upload-btn');
-		var progressBar = document.getElementById('progress');
-		var canvas = document.getElementById('canvas');
-		var gltfLoader = new THREE.GLTFLoader();
-
-		uploadBtn.addEventListener('click', function() {
-			fileInput.click();
-		});
-
-		fileInput.addEventListener('change', function() {
-			var file = fileInput.files[0];
-			var fileSize = file.size / 1024 / 1024;
-			if (fileSize > 25) {
-				alert('File size must be less than 25MB');
-				return;
+	<head>
+		<meta charset="utf-8">
+		<title>Test Website</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				background-color: #f1f1f1;
+				margin: 0;
+				padding: 0;
 			}
-			var reader = new FileReader();
-			reader.readAsDataURL(file);
-			reader.onload = function(event) {
-				var dataURL = event.target.result;
-				var loader = new THREE.FileLoader();
-				loader.load(
-					dataURL,
-					function(glb) {
-						scene = glb.scene;
-						camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-						camera.position.z = 5;
-						renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
-						renderer.setClearColor(0x000000);
-						renderer.setSize(window.innerWidth, window.innerHeight);
-						animate();
-					},
-					function(xhr) {
-						var percent = xhr.loaded / xhr.total * 100;
-						progressBar.style.width = percent.toFixed(2) + '%';
-					},
-					function(error) {
-						console.error(error);
-					}
-				);
+
+			.container {
+				width: 80%;
+				max-width: 800px;
+				margin: 0 auto;
+				padding: 20px;
+				background-color: white;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 			}
-		});
 
-		function animate() {
-			requestAnimationFrame(animate);
-			renderer.render(scene, camera);
-		}
-	</script>
+			h1 {
+				text-align: center;
+				margin-top: 0;
+			}
 
-	<script src="https://threejs.org/build/three.min.js"></script>
-			<script src="https://threejs.org/build/three.min.js"></script>
-		<script src="https://threejs.org/examples/js/loaders/GLTFLoader.js"></script>
+			.form-container {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				margin: 20px 0;
+			}
+
+			.form-control {
+				margin: 10px 0;
+			}
+
+			.file-input-label {
+				cursor: pointer;
+				padding: 10px;
+				background-color: #008CBA;
+				color: white;
+				border-radius: 5px;
+				transition: all 0.3s ease;
+			}
+
+			.file-input-label:hover {
+				background-color: #006F8B;
+			}
+
+			.file-input {
+				display: none;
+			}
+
+			.upload-btn {
+				margin-top: 10px;
+				padding: 10px;
+				background-color: #4CAF50;
+				color: white;
+				border: none;
+				border-radius: 5px;
+				cursor: pointer;
+				transition: all 0.3s ease;
+			}
+
+			.upload-btn:hover {
+				background-color: #2E8B57;
+			}
+
+			.progress-container {
+				height: 20px;
+				background-color: #ddd;
+				border-radius: 10px;
+				overflow: hidden;
+				margin-top: 20px;
+			}
+
+			.progress-bar {
+				height: 100%;
+				background-color: #4CAF50;
+				border-radius: 10px;
+				transition: width 0.3s ease;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>Test Website</h1>
+			<div class="form-container">
+				<div class="form-control">
+					<label for="file-input" class="file-input-label">Choose File</label>
+					<input type="file" id="file-input" class="file-input">
+				</div>
+				<button class="upload-btn">Upload</button>
+				<div class="progress-container">
+					<div class="progress-bar"></div>
+				</div>
+			</div>
+			<div id="result"></div>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 		<script>
-			var scene, camera, renderer;
-			function animate() {
-				requestAnimationFrame(animate);
-				renderer.render(scene, camera);
+			var fileInput = document.getElementById('file-input');
+			var uploadButton = document.querySelector('.upload-btn');
+			var progressBar = document.querySelector('.progress-bar');
+			var resultDiv = document.getElementById('result');
+
+			uploadButton.addEventListener('click', function() {
+				var file = fileInput.files[0];
+
+				if (!file) {
+					resultDiv.innerHTML = '<p>Please select a file to upload</p>';
+					return;
+				}
+
+				var formData = new FormData();
+				formData.append('file', file);
+
+				var xhr = new
+			<div class="container mt-5">
+				<h2>3D Model Viewer</h2>
+				<div class="row">
+					<div class="col-md-6">
+						<div id="canvas-container"></div>
+						<div id="progress-container">
+							<div class="progress">
+								<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+							</div>
+							<p id="progress-status">Loading 3D Model...</p>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="card">
+							<div class="card-body">
+								<h5 class="card-title">Import 3D Model</h5>
+								<form id="model-form">
+									<div class="form-group">
+										<input type="file" class="form-control-file" id="model-file" accept=".obj">
+									</div>
+									<button type="submit" class="btn btn-primary">Import</button>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<script src="https://cdn.rawgit.com/mrdoob/three.js/r90/build/three.js"></script>
+			<script src="https://cdn.rawgit.com/mrdoob/three.js/r90/examples/js/loaders/OBJLoader.js"></script>
+			<script src="https://cdn.rawgit.com/mrdoob/three.js/r90/examples/js/controls/OrbitControls.js"></script>
+			<script>
+				// Initialize variables
+				var container, camera, scene, renderer, controls, model, progressBar, progressStatus;
+
+				// Find container element and initialize progress bar and status
+				container = document.getElementById('canvas-container');
+				progressBar = document.querySelector('.progress-bar');
+				progressStatus = document.getElementById('progress-status');
+
+				// Initialize Three.js
+				function init() {
+					// Create camera
+					camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+					camera.position.set(0, 0, 5);
+
+					// Create scene
+					scene = new THREE.Scene();
+
+					// Add ambient light
+					scene.add(new THREE.AmbientLight(0xffffff));
+
+					// Create renderer and add it to container
+					renderer = new THREE.WebGLRenderer({ antialias: true });
+					renderer.setPixelRatio(window.devicePixelRatio);
+					renderer.setSize(container.clientWidth, container.clientHeight);
+					renderer.setClearColor(0xffffff, 1);
+					container.appendChild(renderer.domElement);
+
+					// Add orbit controls
+					controls = new THREE.OrbitControls(camera, renderer.domElement);
+					controls.enableDamping = true;
+					controls.dampingFactor = 0.25;
+					controls.enableZoom = true;
+
+					// Load model
+					var loader = new THREE.OBJLoader();
+					loader.load(
+						'models/model.obj',
+						function(object) {
+							// Add model to scene
+							model = object;
+							scene.add(model);
+
+							// Update progress bar and status
+							progressBar.style.width = '100%';
+							progressStatus.innerHTML = 'Loading complete!';
+
+							// Render scene
+							render();
+						},
+						function(xhr) {
+							var percent = xhr.loaded / xhr.total * 100;
+							progressBar.style.width = percent.toFixed(2)
+		<div class="container">
+			<div class="row">
+				<div class="col-md-8 offset-md-2">
+					<h1 class="text-center mb-5">3D Model Viewer</h1>
+					<div id="progress-bar" class="progress">
+						<div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 0%">
+						</div>
+					</div>
+					<div class="d-flex justify-content-center mb-5">
+						<input type="file" id="model-input" class="form-control-file" accept=".obj, .gltf, .glb">
+						<button id="import-button" class="btn btn-primary ml-3">Import</button>
+					</div>
+					<div id="viewer-container"></div>
+				</div>
+			</div>
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/three@0.131.2/build/three.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@hughsk/async-file@0.1.1/index.min.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script src="js/GLTFLoader.js"></script>
+		<script src="js/MTLLoader.js"></script>
+		<script src="js/OBJLoader.js"></script>
+		<script>
+			const progressBar = document.getElementById('progress-bar');
+			const modelInput = document.getElementById('model-input');
+			const importButton = document.getElementById('import-button');
+			const viewerContainer = document.getElementById('viewer-container');
+
+			importButton.addEventListener('click', function() {
+				modelInput.click();
+			});
+
+			modelInput.addEventListener('change', function(event) {
+				viewerContainer.innerHTML = '';
+
+				const file = event.target.files[0];
+				const extension = file.name.split('.').pop().toLowerCase();
+
+				if (extension === 'obj') {
+					const objLoader = new THREE.OBJLoader();
+					objLoader.loadAsync(URL.createObjectURL(file), function(object) {
+						onLoad(object);
+					}, onProgress, onError);
+				} else if (extension === 'gltf' || extension === 'glb') {
+					const gltfLoader = new THREE.GLTFLoader();
+					gltfLoader.loadAsync(URL.createObjectURL(file), function(gltf) {
+						onLoad(gltf.scene);
+					}, onProgress, onError);
+				} else {
+					alert('Unsupported file type!');
+				}
+			});
+
+			function onLoad(object) {
+				const scene = new THREE.Scene();
+				scene.add(object);
+
+				const camera = new THREE.PerspectiveCamera(45, viewerContainer.offsetWidth / viewerContainer.offsetHeight, 0.1, 1000);
+				camera.position.set(0, 0, 3);
+
+				const renderer = new THREE.WebGLRenderer({ antialias: true });
+				renderer.setSize(viewerContainer.offsetWidth, viewerContainer.offsetHeight);
+
+				const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+
+				viewerContainer.appendChild(renderer.domElement);
+
+				function animate() {
+					requestAnimationFrame(animate);
+					orbitControls.update();
+					renderer.render(scene, camera);
+				}
+
+				animate();
+			}
+
+			function onProgress(xhr) {
+				var percent = xhr.loaded / xhr.total * 100;
+				progressBar.style.width = percent.toFixed(2) + '%';
+			}
+
+			function onError(error) {
+				console.error(error);
 			}
 		</script>
 	</body>
