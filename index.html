@@ -1,101 +1,101 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Drag and Drop Example</title>
+    <title>Drag and Drop File Uploader</title>
+    <meta charset="UTF-8">
     <style>
       body {
-        background-color: #f0f0f0;
         font-family: Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.4;
+        margin: 0;
+        padding: 0;
       }
-      
+
       #drop-area {
         border: 2px dashed #ccc;
-        border-radius: 10px;
-        width: 400px;
-        height: 200px;
+        color: #ccc;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        height: 300px;
         margin: 50px auto;
-      }
-      
-      #drop-area.highlight {
-        background-color: #eee;
-      }
-      
-      #status {
-        font-size: 18px;
+        padding: 20px;
         text-align: center;
-        margin-top: 20px;
-        display: none;
       }
-      
-      #loading-bar {
-        width: 100%;
-        height: 20px;
-        background-color: #ddd;
-        margin-top: 20px;
-        display: none;
+
+      #drop-area.dragover {
+        border-color: #3bf4ff;
+        color: #3bf4ff;
       }
-      
-      #progress-bar {
-        width: 0%;
-        height: 100%;
-        background-color: #0066cc;
+
+      #file-content {
+        margin: 50px auto;
+        width: 80%;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
     </style>
   </head>
   <body>
     <div id="drop-area">
-      <p>Drag and drop your file here</p>
+      <h1>Drag and Drop File Uploader</h1>
+      <p>Drag and drop a file here or click to select a file.</p>
     </div>
-    
-    <div id="status">Processing...</div>
-    
-    <div id="loading-bar">
-      <div id="progress-bar"></div>
-    </div>
-    
+    <div id="file-content"></div>
+
     <script>
       const dropArea = document.getElementById('drop-area');
-      const status = document.getElementById('status');
-      const loadingBar = document.getElementById('loading-bar');
-      const progressBar = document.getElementById('progress-bar');
-      
-      // Highlight drop area when dragging over it
-      dropArea.addEventListener('dragenter', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropArea.classList.add('highlight');
+      const fileContent = document.getElementById('file-content');
+
+      // Prevent default drag behaviors
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
       });
-      
-      // Unhighlight drop area when dragging out of it
-      dropArea.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropArea.classList.remove('highlight');
+
+      // Highlight drop area when item is dragged over it
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
       });
-      
-      // Prevent default behavior when dropping file
-      dropArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+
+      // Un-highlight drop area when item is dragged away from it
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
       });
-      
-      // Handle file drop
-      dropArea.addEventListener('drop', (e) => {
+
+      // Handle dropped files
+      dropArea.addEventListener('drop', handleDrop, false);
+
+      function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
-        dropArea.classList.remove('highlight');
-        const file = e.dataTransfer.files[0];
+      }
+
+      function highlight(e) {
+        dropArea.classList.add('dragover');
+      }
+
+      function unhighlight(e) {
+        dropArea.classList.remove('dragover');
+      }
+
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        handleFiles(files);
+      }
+
+      function handleFiles(files) {
         const reader = new FileReader();
-        reader.readAsArrayBuffer(file);
-        reader.onload = (event) => {
-          // Process file here
+        reader.readAsText(files[0]);
+        reader.onload = function(e) {
+          fileContent.innerText = e.target.result;
         };
-        status.style.display = 'block';
-        loadingBar.style.display = 'block';
-      });
+      }
     </script>
   </body>
 </html>
+
