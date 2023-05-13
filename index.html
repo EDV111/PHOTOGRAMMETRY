@@ -23,11 +23,28 @@
         background-color: #f7f7f7;
         border: 5px dashed #ccc;
       }
+      #loading-bar-container {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 10px;
+        background-color: #ddd;
+      }
+      #loading-bar {
+        height: 100%;
+        background-color: #4caf50;
+        transition: width 0.1s ease-out;
+      }
     </style>
   </head>
   <body>
     <div id="drop-zone">
       Drag and drop your 3D model file here or click to select a file
+    </div>
+    <div id="loading-bar-container">
+      <div id="loading-bar"></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
@@ -39,6 +56,7 @@
       document.body.appendChild( renderer.domElement );
       
       const dropZone = document.getElementById('drop-zone');
+      const loadingBar = document.getElementById('loading-bar');
       dropZone.addEventListener('dragover', (event) => {
         event.preventDefault();
         dropZone.style.backgroundColor = '#ccc';
@@ -55,21 +73,29 @@
         reader.onload = () => {
           const content = reader.result;
           const loader = new THREE.GLTFLoader();
+          let loaded = 0, total = 0;
           loader.parse(content, '', (gltf) => {
             scene.add(gltf.scene);
+          }, (xhr) => {
+            loaded = xhr.loaded;
+            total = xhr.total;
+            loadingBar.style.width = `${(loaded / total) * 100}%`;
+          }, (error) => {
+            console.error(error);
           });
+          const animate = function () {
+            requestAnimationFrame( animate );
+            renderer.render( scene, camera );
+          };
+          animate();
+          dropZone.style.display = 'none';
+          document.getElementById('loading-bar-container').style.display = 'block';
         };
         reader.readAsArrayBuffer(file);
       });
       
       camera.position.z = 5;
-      
-      const animate = function () {
-        requestAnimationFrame( animate );
-        renderer.render( scene, camera );
-      };
-      
-      animate();
     </script>
   </body>
 </html>
+
