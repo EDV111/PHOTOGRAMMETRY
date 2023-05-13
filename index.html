@@ -1,104 +1,99 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Test Website for 3D Model</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Model Viewer</title>
     <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
-      canvas {
-        display: block;
-      }
-      #drop-zone {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        height: 100%;
-        font-size: 2rem;
-        font-weight: bold;
-        color: #ccc;
-        background-color: #f7f7f7;
-        border: 5px dashed #ccc;
-      }
-      #loading-bar {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 5px;
-        background-color: #f1f1f1;
-        z-index: 9999;
-      }
-      #loading-progress {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 5px;
-        background-color: #4CAF50;
-        z-index: 99999;
-        width: 0;
-        transition: width 0.5s ease-in-out;
-      }
+        #loading-bar {
+            height: 10px;
+            background-color: #eee;
+            margin-top: 10px;
+            width: 100%;
+            position: relative;
+        }
+
+        #loading {
+            height: 100%;
+            background-color: #4CAF50;
+            position: absolute;
+            width: 0%;
+            top: 0;
+            left: 0;
+            transition: width 0.3s ease-in-out;
+        }
+
+        #loading-text {
+            margin-top: 5px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        #cesiumContainer {
+            width: 100%;
+            height: 600px;
+        }
     </style>
-  </head>
-  <body>
-    <div id="drop-zone">
-      Drag and drop your 3D model file here or click to select a file
-    </div>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
     <div id="loading-bar">
-      <div id="loading-progress"></div>
+        <div id="loading"></div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <div id="loading-text"></div>
+
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.83/Build/Cesium/Cesium.js"></script>
     <script>
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-      const renderer = new THREE.WebGLRenderer();
-      renderer.setSize( window.innerWidth, window.innerHeight );
-      document.body.appendChild( renderer.domElement );
-      
-      const dropZone = document.getElementById('drop-zone');
-      dropZone.addEventListener('dragover', (event) => {
-        event.preventDefault();
-        dropZone.style.backgroundColor = '#ccc';
-      });
-      dropZone.addEventListener('dragleave', (event) => {
-        event.preventDefault();
-        dropZone.style.backgroundColor = '#f7f7f7';
-      });
-      dropZone.addEventListener('drop', (event) => {
-        event.preventDefault();
-        dropZone.style.backgroundColor = '#f7f7f7';
-        const file = event.dataTransfer.files[0];
-        const reader = new FileReader();
-        reader.onload = () => {
-          const content = reader.result;
-          const loader = new THREE.GLTFLoader();
-          loader.parse(content, '', (gltf) => {
-            scene.add(gltf.scene);
-            document.getElementById('loading-bar').style.display = 'none';
-          }, (xhr) => {
-            const loadingProgress = xhr.loaded / xhr.total * 100;
-            document.getElementById('loading-progress').style.width = loadingProgress + '%';
-          });
-        };
-        reader.readAsArrayBuffer(file);
-        document.getElementById('loading-bar').style.display = 'block';
-      });
-      
-      camera.position.z = 5;
-      
-      const animate = function () {
-        requestAnimationFrame( animate );
-        renderer.render( scene, camera );
-      };
-      
-      animate();
+        const viewer = new Cesium.Viewer('cesiumContainer');
+
+        const progressBar = document.getElementById('loading');
+        const loadingText = document.getElementById('loading-text');
+
+        // Disable the default event handlers
+        viewer.extend(Cesium.viewerDragDropMixin);
+
+        viewer._dragDrop.viewModel.dropZone.addEventListener('drop', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const files = event.dataTransfer.files;
+            const file = files[0];
+            const fileSize = file.size / (1024 * 1024); // MB
+
+            if (fileSize > 50) {
+                alert('File is too large! Maximum file size is 50 MB.');
+                return;
+            }
+
+            // Update the loading bar
+            progressBar.style.width = '0%';
+            loadingText.innerHTML = 'Loading...';
+
+            const fileUrl = URL.createObjectURL(file);
+
+            // Load the model
+            const model = viewer.scene.primitives.add(Cesium.Model.fromGltf({
+                url: fileUrl,
+                maximumScale: 20000
+            }));
+
+            // Zoom to the model
+            viewer.zoomTo(model);
+
+            // Update the loading bar on progress
+            model.readyPromise.then(function () {
+                loadingText.innerHTML = '';
+                progressBar.style.width = '100%';
+                setTimeout(function () {
+                    progressBar.style.width = '0%';
+                }, 1000);
+            }).otherwise(function (error) {
+                loadingText.innerHTML = '';
+                alert('Error: ' + error);
+            });
+        });
     </script>
-  </body>
+</body>
 </html>
 
 
