@@ -11,9 +11,24 @@
       canvas {
         display: block;
       }
+      #drop-zone {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #ccc;
+        background-color: #f7f7f7;
+        border: 5px dashed #ccc;
+      }
     </style>
   </head>
   <body>
+    <div id="drop-zone">
+      Drag and drop your 3D model file here or click to select a file
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
     <script>
@@ -23,19 +38,29 @@
       renderer.setSize( window.innerWidth, window.innerHeight );
       document.body.appendChild( renderer.domElement );
       
-      const loader = new THREE.GLTFLoader();
-      loader.load(
-        'path/to/your/model.gltf',
-        function ( gltf ) {
-          scene.add( gltf.scene );
-        },
-        function ( xhr ) {
-          console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-        },
-        function ( error ) {
-          console.error( error );
-        }
-      );
+      const dropZone = document.getElementById('drop-zone');
+      dropZone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropZone.style.backgroundColor = '#ccc';
+      });
+      dropZone.addEventListener('dragleave', (event) => {
+        event.preventDefault();
+        dropZone.style.backgroundColor = '#f7f7f7';
+      });
+      dropZone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropZone.style.backgroundColor = '#f7f7f7';
+        const file = event.dataTransfer.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+          const content = reader.result;
+          const loader = new THREE.GLTFLoader();
+          loader.parse(content, '', (gltf) => {
+            scene.add(gltf.scene);
+          });
+        };
+        reader.readAsArrayBuffer(file);
+      });
       
       camera.position.z = 5;
       
