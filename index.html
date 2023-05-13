@@ -92,6 +92,8 @@
       }
 
       function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
         const files = e.dataTransfer.files;
         handleFiles(files);
       }
@@ -99,7 +101,6 @@
       function handleFiles(files) {
         const file = files[0];
         const reader = new FileReader();
-        reader.readAsText(file);
         reader.onloadstart = function(e) {
           progress.style.display = 'block';
         };
@@ -111,7 +112,9 @@
           progress.style.display = 'none';
           fileContent.innerText = e.target.result;
         };
+        reader.readAsText(file);
       }
     </script>
   </body>
 </html>
+
