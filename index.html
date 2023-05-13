@@ -17,27 +17,13 @@
         align-items: center;
         width: 100%;
         height: 100%;
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-weight: bold;
-        color: #ccc;
+        color: #333;
         background-color: #f7f7f7;
-        border: 5px dashed #ccc;
-      }
-      #loading-bar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 10px;
-        background-color: #ccc;
-        z-index: 9999;
-        transition: width 0.2s ease-in-out;
-      }
-      #loading-bar.progress {
-        width: 0;
-      }
-      #loading-bar.complete {
-        width: 100%;
-        background-color: #0f0;
+        border: 5px dashed #333;
+        text-align: center;
+        padding: 1rem;
       }
     </style>
   </head>
@@ -45,7 +31,6 @@
     <div id="drop-zone">
       Drag and drop your 3D model file here or click to select a file
     </div>
-    <div id="loading-bar"></div>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
     <script>
@@ -72,24 +57,11 @@
         reader.onload = () => {
           const content = reader.result;
           const loader = new THREE.GLTFLoader();
-          const progressBar = document.getElementById('loading-bar');
-          loader.load(
-            content,
-            (gltf) => {
-              scene.add(gltf.scene);
-              progressBar.classList.add('complete');
-            },
-            (progress) => {
-              const percentage = progress.loaded / progress.total * 100;
-              progressBar.classList.add('progress');
-              progressBar.style.width = `${percentage}%`;
-            },
-            (error) => {
-              console.error(error);
-            }
-          );
+          loader.parse(content, '', (gltf) => {
+            scene.add(gltf.scene);
+          });
         };
-        reader.readAsDataURL(file);
+        reader.readAsArrayBuffer(file);
       });
       
       camera.position.z = 5;
@@ -103,4 +75,3 @@
     </script>
   </body>
 </html>
-
