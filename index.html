@@ -36,18 +36,28 @@
         white-space: pre-wrap;
         word-wrap: break-word;
       }
+
+      #progress {
+        background-color: #3bf4ff;
+        height: 5px;
+        width: 0;
+        transition: width 500ms ease-in-out;
+        display: none;
+      }
     </style>
   </head>
   <body>
     <div id="drop-area">
       <h1>Drag and Drop File Uploader</h1>
       <p>Drag and drop a file here or click to select a file.</p>
+      <div id="progress"></div>
     </div>
     <div id="file-content"></div>
 
     <script>
       const dropArea = document.getElementById('drop-area');
       const fileContent = document.getElementById('file-content');
+      const progress = document.getElementById('progress');
 
       // Prevent default drag behaviors
       ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -89,9 +99,18 @@
       }
 
       function handleFiles(files) {
+        const file = files[0];
         const reader = new FileReader();
-        reader.readAsText(files[0]);
+        reader.readAsDataURL(file);
+        reader.onloadstart = function(e) {
+          progress.style.display = 'block';
+        };
+        reader.onprogress = function(e) {
+          const progressPercent = (e.loaded / e.total) * 100;
+          progress.style.width = progressPercent + '%';
+        };
         reader.onload = function(e) {
+          progress.style.display = 'none';
           fileContent.innerText = e.target.result;
         };
       }
