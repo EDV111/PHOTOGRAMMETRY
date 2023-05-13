@@ -1,122 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>File Processing</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f2f2f2;
-    }
-
-    #input {
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 999;
-    }
-
-    #input-label {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 300px;
-      height: 100px;
-      border: 2px dashed #666;
-      color: #666;
-      cursor: pointer;
-      font-size: 24px;
-      font-weight: bold;
-      transition: all 0.3s ease;
-    }
-
-    #input-label:hover {
-      background-color: #666;
-      color: #fff;
-    }
-
-    #progress-container {
-      display: none;
-      width: 100%;
-      height: 30px;
-      border: 1px solid #ccc;
-      background-color: #fff;
-      border-radius: 5px;
-      margin-top: 20px;
-    }
-
-    #progress-bar {
-      height: 100%;
-      background-color: #4caf50;
-      border-radius: 5px;
-      width: 0%;
-      transition: all 0.3s ease;
-    }
-
-    #progress-text {
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
-      text-align: center;
-      line-height: 30px;
-    }
-  </style>
+	<title>File Upload Example</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script>
+		$(function() {
+			var progressBar = $('.progress-bar');
+			$('#upload-btn').click(function() {
+				var fileInput = $('#file-input')[0];
+				var file = fileInput.files[0];
+				var formData = new FormData();
+				formData.append('file', file);
+				$.ajax({
+					url: 'upload.php',
+					type: 'POST',
+					data: formData,
+					processData: false,
+					contentType: false,
+					xhr: function() {
+						var xhr = $.ajaxSettings.xhr();
+						if(xhr.upload) {
+							xhr.upload.addEventListener('progress', function(event) {
+								var percent = 0;
+								var position = event.loaded || event.position;
+								var total = event.total;
+								if(event.lengthComputable) {
+									percent = Math.ceil(position / total * 100);
+								}
+								progressBar.width(percent + '%');
+							}, true);
+						}
+						return xhr;
+					},
+					success: function(response) {
+						alert(response);
+					},
+					error: function(jqXHR, textStatus, errorThrown) {
+						alert(textStatus);
+					}
+				});
+			});
+		});
+	</script>
+	<style>
+		.progress {
+			height: 20px;
+			background-color: #f5f5f5;
+			border-radius: 4px;
+			-webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+			box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+			margin-bottom: 10px;
+		}
+		.progress-bar {
+			height: 100%;
+			color: #fff;
+			text-align: center;
+			background-color: #5cb85c;
+			border-radius: 4px;
+			-webkit-transition: width 0.6s ease;
+			transition: width 0.6s ease;
+		}
+	</style>
 </head>
 <body>
-  <div id="input-label">
-    <label for="input">Select file</label>
-    <input type="file" id="input">
-  </div>
-  <div id="progress-container">
-    <div id="progress-bar"></div>
-    <div id="progress-text">0%</div>
-  </div>
-  <script>
-    var input = document.getElementById("input");
-    var progressBar = document.getElementById("progress-bar");
-    var progressText = document.getElementById("progress-text");
-    var progressContainer = document.getElementById("progress-container");
-
-    input.addEventListener("change", function() {
-      var file = input.files[0];
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', file.name, true);
-      xhr.responseType = 'arraybuffer';
-
-      xhr.onload = function() {
-        var data = this.response;
-        // Do something with the data here
-        // ...
-        progressContainer.style.display = "none";
-      };
-
-      xhr.onerror = function() {
-        alert("Error processing file.");
-        progressContainer.style.display = "none";
-      };
-
-      xhr.onprogress = function(event) {
-        if (event.lengthComputable) {
-          var percentComplete = (event.loaded / event.total) * 100;
-          progressBar.style.width = percentComplete + "%";
-          progressText.innerHTML = Math.round(percentComplete) + "%";
-        }
-      };
-
-      progressContainer.style.display = "block";
-      xhr.send();
-    });
-  </script>
+	<div>
+		<input type="file" id="file-input" style="display: none;" />
+		<button id="upload-btn">Import</button>
+	</div>
+	<div class="progress">
+		<div class="progress-bar" role="progressbar"></div>
+	</div>
 </body>
 </html>
 
