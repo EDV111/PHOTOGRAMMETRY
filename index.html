@@ -92,16 +92,14 @@
       }
 
       function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        
+        const files = e.dataTransfer.files;
         handleFiles(files);
       }
 
       function handleFiles(files) {
         const file = files[0];
         const reader = new FileReader();
-        reader.readAsDataURL(file);
+        reader.readAsText(file);
         reader.onloadstart = function(e) {
           progress.style.display = 'block';
         };
@@ -117,4 +115,3 @@
     </script>
   </body>
 </html>
-
