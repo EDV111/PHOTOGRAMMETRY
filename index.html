@@ -1,120 +1,69 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Drag and Drop File Uploader</title>
-    <meta charset="UTF-8">
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        font-size: 16px;
-        line-height: 1.4;
-        margin: 0;
-        padding: 0;
-      }
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Website</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+    integrity="sha384-ChfqqxuZUCnJSK3gBtuOyHlvxDmjM2+5TcSLz9/BeVRMMXQaBtMATP0mp7I5U1jQ"
+    crossorigin="anonymous">
+  <style>
+    #dropzone {
+      border: 2px dashed gray;
+      padding: 1rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-4">
+    <h1>Test Website</h1>
+    <hr>
+    <div id="dropzone">Drop a GLP file here to view its contents</div>
+    <hr>
+    <canvas id="preview"></canvas>
+  </div>
 
-      #drop-area {
-        border: 2px dashed #ccc;
-        color: #ccc;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 300px;
-        margin: 50px auto;
-        padding: 20px;
-        text-align: center;
-      }
-
-      #drop-area.dragover {
-        border-color: #3bf4ff;
-        color: #3bf4ff;
-      }
-
-      #file-content {
-        margin: 50px auto;
-        width: 80%;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-      }
-
-      #progress {
-        background-color: #3bf4ff;
-        height: 5px;
-        width: 0;
-        transition: width 500ms ease-in-out;
-        display: none;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="drop-area">
-      <h1>Drag and Drop File Uploader</h1>
-      <p>Drag and drop a file here or click to select a file.</p>
-      <div id="progress"></div>
-    </div>
-    <div id="file-content"></div>
-
-    <script>
-      const dropArea = document.getElementById('drop-area');
-      const fileContent = document.getElementById('file-content');
-      const progress = document.getElementById('progress');
-
-      // Prevent default drag behaviors
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, preventDefaults, false);
-        document.body.addEventListener(eventName, preventDefaults, false);
-      });
-
-      // Highlight drop area when item is dragged over it
-      ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, highlight, false);
-      });
-
-      // Un-highlight drop area when item is dragged away from it
-      ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, unhighlight, false);
-      });
-
-      // Handle dropped files
-      dropArea.addEventListener('drop', handleDrop, false);
-
-      function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-
-      function highlight(e) {
-        dropArea.classList.add('dragover');
-      }
-
-      function unhighlight(e) {
-        dropArea.classList.remove('dragover');
-      }
-
-      function handleDrop(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const files = e.dataTransfer.files;
-        handleFiles(files);
-      }
-
-      function handleFiles(files) {
-        const file = files[0];
-        const reader = new FileReader();
-        reader.onloadstart = function(e) {
-          progress.style.display = 'block';
+  <script>
+    // Set up the dropzone element to handle file drops
+    var dropzone = document.getElementById('dropzone');
+    dropzone.addEventListener('dragover', function (evt) {
+      evt.preventDefault();
+      dropzone.classList.add('border-primary');
+    });
+    dropzone.addEventListener('dragleave', function (evt) {
+      evt.preventDefault();
+      dropzone.classList.remove('border-primary');
+    });
+    dropzone.addEventListener('drop', function (evt) {
+      evt.preventDefault();
+      dropzone.classList.remove('border-primary');
+      var file = evt.dataTransfer.files[0];
+      if (file.type === 'application/octet-stream') {
+        var reader = new FileReader();
+        reader.onload = function (evt) {
+          // Parse the GLP file and extract the relevant information
+          var data = new DataView(evt.target.result);
+          var numPoints = data.getInt32(0, true);
+          var xCoords = new Float32Array(data.buffer, 4, numPoints);
+          var yCoords = new Float32Array(data.buffer, 4 + numPoints * 4, numPoints);
+          // Draw the points on a canvas element
+          var canvas = document.getElementById('preview');
+          var ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = 'black';
+          for (var i = 0; i < numPoints; i++) {
+            ctx.beginPath();
+            ctx.arc(xCoords[i], yCoords[i], 5, 0, 2 * Math.PI);
+            ctx.fill();
+          }
         };
-        reader.onprogress = function(e) {
-          const progressPercent = (e.loaded / e.total) * 100;
-          progress.style.width = progressPercent + '%';
-        };
-        reader.onload = function(e) {
-          progress.style.display = 'none';
-          fileContent.innerText = e.target.result;
-        };
-        reader.readAsText(file);
+        reader.readAsArrayBuffer(file);
+      } else {
+        alert('Please drop a GLP file.');
       }
-    </script>
-  </body>
+    });
+  </script>
+
+</body>
 </html>
 
