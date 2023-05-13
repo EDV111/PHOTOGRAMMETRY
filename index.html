@@ -98,6 +98,7 @@
         function unhighlight(e) {
             dropArea.classList.remove('highlight')
         }
+
         function handleDrop(e) {
             const dt = e.dataTransfer
             const files = dt.files
@@ -106,56 +107,62 @@
         }
 
         function handleFiles(files) {
+            files = [...files]
             const file = files[0]
-            const reader = new FileReader()
+            const fileName = file.name
+            const fileSize = file.size
+            const fileType = file.type
 
-            reader.readAsDataURL(file)
-            reader.onloadstart = () => {
-                loadingBar.style.width = "0%"
-                loadingBar.style.display = "block"
+            const validExtensions = ['glb', 'gltf']
+            const isValidFileType = validExtensions.some(ext => fileName.toLowerCase().endsWith(ext))
+
+                        if (!isValidFileType) {
+                alert('Invalid file type. Please upload a GLB or GLTF file.')
+                return
             }
 
-            reader.onprogress = (event) => {
-                const progress = Math.round((event.loaded / event.total) * 100)
-                loadingBar.style.width = `${progress}%`
-            }
+            const formData = new FormData()
+            formData.append('model', file)
 
-            reader.onload = (event) => {
-                const fileUrl = event.target.result
+            const xhr = new XMLHttpRequest()
+            xhr.open('POST', '/api/process-model', true)
 
-                const model = viewer.scene.primitives.add(Cesium.Model.fromGltf({
-                    url: fileUrl,
-                    maximumScale: 20000
-                }));
+            xhr.upload.addEventListener('progress', e => {
+                const percentComplete = (e.loaded / e.total) * 100
+                loadingBar.style.width = percentComplete + '%'
+            })
 
-                viewer.zoomTo(model)
-
-                const modelInfo = document.createElement('div')
-                modelInfo.innerHTML = `
-                    <h2>${file.name}</h2>
-                    <ul>
-                        <li>Number of nodes: ${model.nodes.length}</li>
-                        <li>Number of meshes: ${model.meshes.length}</li>
-                        <li>Number of materials: ${model.materials.length}</li>
-                    </ul>
-                `
-
-                const container = document.getElementById("container")
-                container.appendChild(modelInfo)
-
-                loadingBar.style.width = "100%"
+            xhr.addEventListener('load', e => {
+                loadingBar.style.width = '100%'
                 setTimeout(() => {
-                    loadingBar.style.display = "none"
-                }, 500)
-            }
+                    dropArea.classList.remove('highlight')
+                    loadingBar.style.width = '0%'
+                }, 1000)
 
-            reader.onerror = () => {
-                console.error('Error reading file')
-            }
+                const gltfUrl = JSON.parse(xhr.responseText).gltfUrl
+                const modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(
+                    Cesium.Cartesian3.fromDegrees(-75.62898254394531, 40.02804946899414, 100.0)
+                )
+
+                const entity = viewer.entities.add({
+                    name: fileName,
+                    position: Cesium.Cartesian3.fromDegrees(-75.62898254394531, 40.02804946899414, 100.0),
+                    model: {
+                        uri: gltfUrl,
+                        scale: 1.0,
+                        minimumPixelSize: 128,
+                        maximumScale: 20000,
+                        modelMatrix: modelMatrix,
+                    },
+                })
+
+                viewer.zoomTo(entity)
+            })
+
+            xhr.send(formData)
         }
     </script>
 </body>
 </html>
-
 
 
