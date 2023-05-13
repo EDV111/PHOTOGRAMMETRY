@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
@@ -7,6 +7,7 @@
       body {
         margin: 0;
         overflow: hidden;
+        background-color: #f7f7f7;
       }
       canvas {
         display: block;
@@ -23,38 +24,25 @@
         background-color: #f7f7f7;
         border: 5px dashed #ccc;
       }
-      .loading-bar {
-        width: 100%;
-        height: 5px;
+      #progress-bar {
         position: fixed;
         top: 0;
         left: 0;
-        z-index: 1000;
-      }
-      .loading-bar-fill {
-        height: 100%;
-        background-color: #4CAF50;
-        animation: loading-bar 5s linear;
-      }
-      @keyframes loading-bar {
-        0% {
-          width: 0%;
-        }
-        100% {
-          width: 100%;
-        }
+        height: 5px;
+        width: 0%;
+        background-color: #4caf50;
+        z-index: 1;
       }
     </style>
   </head>
   <body>
-    <div class="loading-bar">
-      <div class="loading-bar-fill"></div>
-    </div>
     <div id="drop-zone">
       Drag and drop your 3D model file here or click to select a file
     </div>
+    <div id="progress-bar"></div>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/progressbar.js/1.0.1/progressbar.min.js" integrity="sha512-B12L3ldeanYYo19Z8nmOL8npVEvzll/ZfWWf5u4W88RR8iYUyDQJzaItbbJbM2qX5rLPuLQ2U+UQc8H9Q5cIhw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
@@ -75,18 +63,15 @@
         event.preventDefault();
         dropZone.style.backgroundColor = '#f7f7f7';
         const file = event.dataTransfer.files[0];
+        const progressBar = new ProgressBar.Line('#progress-bar', { color: '#4caf50' });
         const reader = new FileReader();
-        reader.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const progressBar = document.querySelector('.loading-bar-fill');
-            progressBar.style.width = (event.loaded / event.total) * 100 + '%';
-          }
-        };
         reader.onload = () => {
           const content = reader.result;
           const loader = new THREE.GLTFLoader();
           loader.parse(content, '', (gltf) => {
             scene.add(gltf.scene);
+          }, (xhr) => {
+            progressBar.animate(xhr.loaded / xhr.total);
           });
         };
         reader.readAsArrayBuffer(file);
