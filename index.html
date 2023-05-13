@@ -20,7 +20,7 @@
       <hr>
       <div class="row">
         <div class="col-md-6">
-          <div id="dropzone" class="mb-4">Drop a GLP file here to view its contents</div>
+          <div id="dropzone" class="mb-4">Drop a GLB file here to view its contents</div>
           <div id="progress" class="progress mb-4" style="display:none;">
             <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">Uploading...</div>
           </div>
@@ -54,7 +54,7 @@
           evt.preventDefault();
           dropzone.removeClass('border-primary');
           var file = evt.originalEvent.dataTransfer.files[0];
-          if (file.type === 'application/octet-stream') {
+          if (file.type === 'model/gltf-binary') {
             // Show the progress bar and start uploading the file
             var progress = $('#progress');
             progress.show();
@@ -62,62 +62,61 @@
             progressBar.css('width', '0%');
             var formData = new FormData();
             formData.append('file', file);
-            $.ajax({
-              url: 'process_glp.php',
-              type: 'POST',
-              data: formData,
-              contentType: false,
-              processData: false,
-                            xhr: function () {
-                var xhr = $.ajaxSettings.xhr();
-                if (xhr.upload) {
-                  xhr.upload.addEventListener('progress', function (evt) {
-                    if (evt.lengthComputable) {
-                      var percent = (evt.loaded / evt.total) * 100;
-                      progressBar.css('width', percent + '%');
-                    }
-                  }, false);
-                }
-                return xhr;
-              },
-              success: function (response) {
-                // Hide the progress bar
-                progress.hide();
+            // ...
+    $.ajax({
+      url: 'process_glb.php',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      xhr: function () {
+        var xhr = $.ajaxSettings.xhr();
+        if (xhr.upload) {
+          xhr.upload.addEventListener('progress', function (evt) {
+            if (evt.lengthComputable) {
+              var percent = (evt.loaded / evt.total) * 100;
+              progressBar.css('width', percent + '%');
+            }
+          }, false);
+        }
+        xhr.responseType = 'arraybuffer'; // Set the response type to arraybuffer
+        return xhr;
+      },
+      success: function (response) {
+        // Hide the progress bar
+        progress.hide();
 
-                // Parse the GLP file and extract the relevant information
-                var data = new DataView(response);
-                var numPoints = data.getInt32(0, true);
-                var xCoords = new Float32Array(data.buffer, 4, numPoints);
-                var yCoords = new Float32Array(data.buffer, 4 + numPoints * 4, numPoints);
+        // Parse the GLB file and extract the relevant information
+        var gltf = GLTFLoader.parse(response);
+        var scene = gltf.scene;
 
-                // Create a new canvas to display the preview and set its dimensions
-                var canvas = $('#preview')[0];
-                canvas.width = 600;
-                canvas.height = 400;
+        // Create a new canvas to display the preview and set its dimensions
+        var canvas = $('#preview')[0];
+        canvas.width = 600;
+        canvas.height = 400;
 
-                // Get the canvas context and set the line style
-                var ctx = canvas.getContext('2d');
-                ctx.strokeStyle = 'black';
-                ctx.lineWidth = 1;
+        // Get the canvas context and set the line style
+        var ctx = canvas.getContext('2d');
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 1;
 
-                // Draw the path on the canvas
-                ctx.beginPath();
-                ctx.moveTo(xCoords[0], yCoords[0]);
-                for (var i = 1; i < numPoints; i++) {
-                  ctx.lineTo(xCoords[i], yCoords[i]);
-                }
-                ctx.stroke();
-              },
-              error: function () {
-                alert('An error occurred while processing the file.');
-              }
-            });
-          } else {
-            alert('Please drop a GLP file.');
-          }
-        });
-      });
-    </script>
-  </body>
+        // Draw the scene on the canvas
+        var camera = new THREE.PerspectiveCamera(50, canvas.width / canvas.height, 1, 1000);
+        var renderer = new THREE.WebGLRenderer({ canvas: canvas });
+        renderer.setSize(canvas.width, canvas.height);
+        renderer.render(scene, camera);
+      },
+      error: function () {
+        alert('An error occurred while processing the file.');
+      }
+    });
+  } else {
+    alert('Please drop a GLB file.');
+  }
+});
+</script>
+</body>
 </html>
+
+
 
