@@ -1,94 +1,54 @@
-// Define variables for the three.js environment
-let camera, scene, renderer, model;
+const canvas = document.getElementById("renderCanvas");
+const engine = new BABYLON.Engine(canvas, true);
 
-// Define a function to load a GLTF model
-function loadModel(file) {
-  // Create a new loader for GLTF models
-  const loader = new THREE.GLTFLoader();
+let scene;
 
-  // Load the GLTF model
-  loader.load(
-    file,
-    (gltf) => {
-      // Set the loaded model to a variable
-      model = gltf.scene;
+const createScene = () => {
+  scene = new BABYLON.Scene(engine);
 
-      // Add the model to the scene
-      scene.add(model);
+  const camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2, 5, new BABYLON.Vector3(0, 0, 0), scene);
+  camera.attachControl(canvas, true);
 
-      // Set the camera position to view the model
-      const box = new THREE.Box3().setFromObject(model);
-      const center = new THREE.Vector3();
-      box.getCenter(center);
-      const size = box.getSize(new THREE.Vector3());
-      const distance = Math.max(size.x, size.y, size.z) * 2;
-      camera.position.copy(center);
-      camera.position.x += distance;
-      camera.position.y += distance;
-      camera.position.z += distance;
-      camera.lookAt(center);
+  const light = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 1, 0), scene);
+  light.intensity = 0.7;
 
-      // Render the scene
-      renderer.render(scene, camera);
-    },
-    (xhr) => {
-      // Display a loading progress bar
-      const loadingBar = document.getElementById("loading-bar");
-      loadingBar.style.width = (xhr.loaded / xhr.total) * 100 + "%";
-    },
-    (error) => {
-      console.log(error);
-    }
-  );
-}
+  return scene;
+};
 
-// Define a function to set up the three.js environment
-function init() {
-  // Create a new camera and set its position
-  camera = new THREE.PerspectiveCamera(
-    70,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
-  camera.position.z = 5;
+scene = createScene();
 
-  // Create a new scene
-  scene = new THREE.Scene();
+const importButton = document.getElementById("importButton");
+const fileInput = document.getElementById("fileInput");
 
-  // Create a new renderer and set its size
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
+fileInput.onchange = (event) => {
+  const files = event.target.files;
+  const fileToLoad = files[0];
 
-  // Add the renderer to the HTML document
-  const viewport = document.getElementById("viewport");
-  viewport.appendChild(renderer.domElement);
+  const fileReader = new FileReader();
+  fileReader.onload = (event) => {
+    const data = event.target.result;
 
-  // Create a new ambient light and add it to the scene
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-  scene.add(ambientLight);
+    BABYLON.SceneLoader.Load("", fileToLoad.name, engine, (scene) => {
+      scene.createDefaultCameraOrLight(true, true, true);
+      scene.activeCamera.alpha += Math.PI;
+      scene.activeCamera.beta += Math.PI;
 
-  // Create a new directional light and add it to the scene
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-  scene.add(directionalLight);
+      scene.activeCamera.attachControl(canvas, true);
 
-  // Call the animate function to render the scene
-  animate();
-}
+      engine.runRenderLoop(() => {
+        scene.render();
+      });
+    });
+  };
 
-// Define a function to render the scene
-function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
+  fileReader.readAsArrayBuffer(fileToLoad);
+};
 
-// Call the init function to set up the three.js environment
-init();
+engine.runRenderLoop(() => {
+  scene.render();
+});
 
-// Add an event listener to the file input
-const fileInput = document.getElementById("file-input");
-fileInput.addEventListener("change", (event) => {
-  const file = URL.createObjectURL(event.target.files[0]);
-  loadModel(file);
+window.addEventListener("resize", () => {
+  engine.resize();
 });
 
