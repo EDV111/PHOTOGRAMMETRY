@@ -1,101 +1,110 @@
-const container = document.getElementById('canvas-container');
-const canvas = document.getElementById('canvas');
-const renderer = new THREE.WebGLRenderer({ canvas });
-
-const fov = 75;
-const aspect = 2;  // the canvas default
-const near = 0.1;
-const far = 5;
-const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-camera.position.z = 2;
-
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-const scene = new THREE.Scene();
-
-const boxWidth = 1;
-const boxHeight = 1;
-const boxDepth = 1;
-const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-
-function addLights() {
-  const color = 0xFFFFFF;
-  const intensity = 1;
-  const light = new THREE.DirectionalLight(color, intensity);
-  light.position.set(-1, 2, 4);
-  scene.add(light);
-}
-
-function addBoxToScene(material) {
-  const cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
-}
-
-function addGridHelper() {
-  const size = 10;
-  const divisions = 10;
-  const gridHelper = new THREE.GridHelper(size, divisions);
-  scene.add(gridHelper);
-}
-
-function render(time) {
-  time *= 0.001;  // convert time to seconds
-
-  controls.update();
-
-  renderer.render(scene, camera);
-
-  requestAnimationFrame(render);
-}
-
-function init() {
-  addLights();
-  addGridHelper();
-  const material = new THREE.MeshPhongMaterial({ color: 0x44aa88 });
-  addBoxToScene(material);
-
-  requestAnimationFrame(render);
-}
+// global variables
+let camera, scene, renderer, controls, mesh;
+let animationId;
 
 init();
+animate();
 
-// Upload file
-$('#file-input').on('change', function () {
-  var file = this.files[0];
+function init() {
+  // create camera
+  camera = new THREE.PerspectiveCamera(
+    70,
+    window.innerWidth / window.innerHeight,
+    1,
+    1000
+  );
+  camera.position.z = 5;
 
-  var formData = new FormData();
-  formData.append('file', file);
+  // create scene
+  scene = new THREE.Scene();
 
-  // Display progress bar
-  $('#loading-bar').css('display', 'block');
+  // create light
+  const light = new THREE.PointLight(0xffffff, 1);
+  light.position.set(0, 0, 10);
+  scene.add(light);
 
-  $.ajax({
-    url: '/upload',
-    type: 'POST',
-    data: formData,
-    processData: false,
-    contentType: false,
-    xhr: function () {
-      var xhr = $.ajaxSettings.xhr();
-      xhr.upload.onprogress = function (e) {
-        var progress = (e.loaded / e.total) * 100;
-        $('#loading-bar .progress').css('width', progress + '%');
-      };
-      return xhr;
+  // create renderer
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  // create controls
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableZoom = true;
+  controls.enablePan = false;
+
+  // load the default model
+  loadModel("models/teapot.obj");
+
+  // listen for window resize
+  window.addEventListener("resize", onWindowResize);
+}
+
+function animate() {
+  animationId = requestAnimationFrame(animate);
+
+  // render the scene
+  renderer.render(scene, camera);
+}
+
+function loadModel(modelPath) {
+  // cancel the current animation
+  cancelAnimationFrame(animationId);
+
+  // remove any existing mesh
+  if (mesh) {
+    scene.remove(mesh);
+    mesh.geometry.dispose();
+    mesh.material.dispose();
+  }
+
+  // load the new model
+  const loader = new THREE.OBJLoader();
+  loader.load(
+    modelPath,
+    function (object) {
+      // set the new mesh
+      mesh = object;
+      mesh.position.set(0, 0, 0);
+      scene.add(mesh);
+
+      // center the model in the view
+      const box = new THREE.Box3().setFromObject(mesh);
+      const center = box.getCenter(new THREE.Vector3());
+      mesh.position.sub(center);
+
+      // set the camera position and target
+      const distance = box.getSize(new THREE.Vector3()).length();
+      const direction = controls.target
+        .clone()
+        .sub(camera.position)
+        .normalize();
+      camera.position.copy(direction.multiplyScalar(distance * 1.5)).add(center);
+      controls.target.copy(center);
+
+      // start the animation
+      animate();
     },
-    success: function (response) {
-      // Hide progress bar
-      $('#loading-bar').css('display', 'none');
-
-      // Load model into scene
-      const loader = new THREE.GLTFLoader();
-      loader.load(response.filepath, function (gltf) {
-        scene.add(gltf.scene);
-      });
+    function (xhr) {
+      // display the loading progress
+      const percentLoaded = (xhr.loaded / xhr.total) * 100;
+      console.log("Model " + modelPath + " " + Math.round(percentLoaded, 2) + "% loaded");
+      updateLoadingBar(percentLoaded);
     },
-    error: function (err) {
-      console.log(err);
+    function (error) {
+      console.error(error);
     }
-  });
-});
+  );
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function updateLoadingBar(percent) {
+  const loadingBar = document.getElementById("loading-bar");
+  loadingBar.style.width = percent + "%";
+}
 
