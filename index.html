@@ -5,74 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>GLB Viewer</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" />
     <style>
-      * {
-        box-sizing: border-box;
-      }
-
       body {
-        background-color: #000;
-        color: #fff;
-        font-family: monospace;
-        font-size: 16px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
         margin: 0;
-      }
-
-      #canvas {
-        width: 100%;
-        height: 100%;
-        max-width: 600px;
-        max-height: 600px;
-        margin-bottom: 20px;
-        border: 2px solid #fff;
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-      }
-
-      #progress-bar {
-        width: 100%;
-        max-width: 600px;
-        height: 20px;
-        margin-bottom: 20px;
-        border: 2px solid #fff;
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-        position: relative;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #000;
         overflow: hidden;
       }
 
-      #progress-bar::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 0;
-        background-color: rgba(255, 255, 255, 0.5);
-        animation: progress-bar-animation 10s linear forwards;
+      canvas {
+        width: 100%;
+        height: 100%;
       }
 
-      @keyframes progress-bar-animation {
-        0% {
-          width: 0;
+      .progress-container {
+        width: 100%;
+        height: 20px;
+        background-color: #333;
+        margin-top: 10px;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background-color: #4caf50;
+        width: 0%;
+      }
+
+      #import-btn {
+        font-size: 16px;
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        margin-top: 20px;
+        cursor: pointer;
+      }
+
+      #import-btn:hover {
+        background-color: #4caf50;
+      }
+
+      .retro-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAfklEQVR42mP8X8zg8DwQMY2GJgYGCg4MDAwB+CGcvgiUcRMFguIqBlQYBF6oqJ6BZAxgaGBlYXIBrCIz8YoMzAwMjIwMhYxMjQ2MDFgIBCD8QTVFSE5UAAAAAElFTkSuQmCC");
+        -webkit-animation: animatedBackground 50s linear infinite;
+        animation: animatedBackground 50s linear infinite;
+      }
+
+      @-webkit-keyframes animatedBackground {
+        from {
+          background-position: 0 0;
         }
-        100% {
-          width: 100%;
+        to {
+          background-position: 100% 0;
+        }
+      }
+
+      @keyframes animatedBackground {
+        from {
+          background-position: 0 0;
+        }
+        to {
+          background-position: 100% 0;
         }
       }
     </style>
   </head>
   <body>
+    <div class="retro-bg"></div>
+    <div id="progress-container" class="progress-container">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+    <button id="import-btn">Import GLB file</button>
     <canvas id="canvas"></canvas>
-    <input type="file" id="file-input" />
-    <div id="progress-bar"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@babylonjs/core@4.2.0/babylon.max.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@babylonjs/loaders@4.2.0/babylonjs.loaders.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
