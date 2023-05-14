@@ -1,38 +1,45 @@
-const progressBar = document.querySelector('.progress-bar');
+// DOM elements
+const inputElement = document.getElementById("fileInput");
+const progressBar = document.getElementById("progressBar");
+const viewPortContainer = document.getElementById("viewPortContainer");
 
-const modelViewer = document.querySelector('model-viewer');
+// GLTF scene
+let scene;
 
-function showProgress() {
-  progressBar.style.display = 'block';
-}
-
-function hideProgress() {
-  progressBar.style.display = 'none';
-}
-
-function updateProgress(event) {
-  if (event.lengthComputable) {
-    const percentComplete = (event.loaded / event.total) * 100;
-    progressBar.style.width = `${percentComplete}%`;
+// Load GLTF file on file input change
+inputElement.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) {
+    return;
   }
-}
+  loadGLTF(file);
+});
 
-function importModel() {
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = '.glb';
-  fileInput.onchange = () => {
-    showProgress();
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      modelViewer.src = event.target.result;
-      hideProgress();
-    };
-    reader.onprogress = updateProgress;
-    reader.readAsDataURL(file);
+// Load GLTF function
+function loadGLTF(file) {
+  const reader = new FileReader();
+  reader.readAsArrayBuffer(file);
+  reader.onload = function () {
+    const arrayBuffer = reader.result;
+    const loader = new THREE.GLTFLoader();
+    // Show progress bar
+    progressBar.style.display = "block";
+    loader.load(
+      URL.createObjectURL(new Blob([arrayBuffer])),
+      (gltf) => {
+        scene = gltf.scene;
+        viewPortContainer.appendChild(scene);
+        // Hide progress bar
+        progressBar.style.display = "none";
+      },
+      (xhr) => {
+        // Update progress bar
+        const progress = (xhr.loaded / xhr.total) * 100;
+        progressBar.style.width = `${progress}%`;
+      },
+      (error) => {
+        console.error("Error loading GLTF file:", error);
+      }
+    );
   };
-  fileInput.click();
 }
-
-document.querySelector('.import-button').addEventListener('click', importModel);
