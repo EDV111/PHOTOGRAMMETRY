@@ -1,19 +1,118 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>My NERF Website</title>
+    <title>NERF Viewer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+    <style>
+      /* Reset default styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      /* Page layout */
+      body {
+        font-family: 'Roboto', sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #333;
+        color: #fff;
+      }
+      
+      .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 90%;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      
+      .title {
+        font-size: 36px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      
+      /* Dropzone */
+      .dropzone {
+        border: 2px dashed #ccc;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 500px;
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: border-color 0.3s ease-in-out;
+      }
+      
+      .dropzone:hover {
+        border-color: #fff;
+      }
+      
+      .dropzone-text {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      
+      /* Loading bar */
+      .loading-bar-container {
+        width: 100%;
+        max-width: 500px;
+        height: 10px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        margin-top: 20px;
+        overflow: hidden;
+      }
+      
+      .loading-bar {
+        height: 100%;
+        width: 0;
+        background-color: #fff;
+        transition: width 0.3s ease-in-out;
+      }
+      
+      /* Error message */
+      .error-message {
+        color: red;
+        margin-top: 10px;
+        text-align: center;
+      }
+      
+      /* Viewer */
+      #viewer {
+        width: 100%;
+        max-width: 500px;
+        height: 400px;
+        margin-top: 20px;
+      }
+    </style>
   </head>
+  
   <body>
-    <h1>Welcome to my NERF website!</h1>
-    <input type="file" id="file-input">
-    <button id="process-button">Process File</button>
-    <div id="loading-bar" style="display:none;">
-      <div id="progress-bar"></div>
+    <div class="container">
+      <h1 class="title">NERF Viewer</h1>
+      <div class="dropzone" id="dropzone">
+        <p class="dropzone-text">Drag and drop a NERF file here or click to select a file.</p>
+      </div>
+      <div class="loading-bar-container">
+        <div class="loading-bar" id="loading-bar"></div>
+      </div>
+      <div class="error-message" id="error-message"></div>
+      <canvas id="viewer"></canvas>
     </div>
-    <div id="viewer-container"></div>
     
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
