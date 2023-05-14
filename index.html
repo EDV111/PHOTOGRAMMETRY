@@ -1,65 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>NERF GLB Viewer</title>
-  <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.3/css/bulma.min.css" />
-  <link rel="stylesheet" href="./style.css" />
+  <title>GLB Viewer</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <section class="hero is-primary">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title">
-          NERF GLB Viewer
-        </h1>
-        <h2 class="subtitle">
-          View and interact with NERF GLB files
-        </h2>
-      </div>
+  <header>
+    <h1>GLB Viewer</h1>
+  </header>
+  <main>
+    <div id="loading-bar-container">
+      <div id="loading-bar"></div>
     </div>
-  </section>
-  <section class="section">
-    <div class="container">
-      <div class="columns">
-        <div class="column is-two-thirds">
-          <div class="gl-wrapper">
-            <canvas id="gl-canvas" width="800" height="600"></canvas>
-          </div>
-        </div>
-        <div class="column">
-          <div class="upload-box">
-            <h3 class="title is-4">Import GLB file</h3>
-            <div class="file has-name is-fullwidth">
-              <label class="file-label">
-                <input class="file-input" type="file" name="glb-file" accept=".glb" id="glb-input">
-                <span class="file-cta">
-                  <span class="file-icon">
-                    <i class="fas fa-upload"></i>
-                  </span>
-                  <span class="file-label">
-                    Choose a file…
-                  </span>
-                </span>
-                <span class="file-name" id="glb-filename">
-                  No file selected
-                </span>
-              </label>
-            </div>
-            <progress class="progress is-primary is-hidden" id="upload-progress" value="0" max="100"></progress>
-            <progress class="progress is-link is-hidden" id="process-progress" value="0" max="100"></progress>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <script src="./app.js"></script>
+    <div id="model-container"></div>
+  </main>
+  <script src="app.js"></script>
 </body>
-
 </html>
 
