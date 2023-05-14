@@ -1,32 +1,23 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <link rel="stylesheet" href="style.css">
-    <title>3D Viewer</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        background-color: #000000;
-      }
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Slick Rick NERF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Slick Rick NERF</h1>
+  
+  <div id="loader">
+    <input type="file" id="file-input" accept=".glb" onchange="loadModel()">
+    <label for="file-input">Import</label>
+  </div>
 
-      #fileInput {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 999;
-      }
-    </style>
-  </head>
-  <body>
-    <input type="file" id="fileInput" accept=".stl">
-    <script src="https://threejs.org/build/three.min.js"></script>
-    <script src="https://threejs.org/examples/js/loaders/STLLoader.js"></script>
-    <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
-    <script src="utils.js"></script>
-    <script src="app.js"></script>
-  </body>
+  <div id="model-container"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="app.js"></script>
+</body>
 </html>
+
