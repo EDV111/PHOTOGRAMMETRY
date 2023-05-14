@@ -1,55 +1,101 @@
-const canvas = document.getElementById('renderCanvas');
-const engine = new BABYLON.Engine(canvas, true);
+// DOM elements
+const importBtn = document.querySelector("#import-btn");
+const fileInput = document.querySelector("#file-input");
+const viewer = document.querySelector("#viewer");
 
-// Create a scene
-const createScene = function() {
-  const scene = new BABYLON.Scene(engine);
-  const camera = new BABYLON.ArcRotateCamera('camera1', 0, 0, 0, new BABYLON.Vector3(0, 0, 0), scene);
-  camera.setPosition(new BABYLON.Vector3(0, 5, -10));
-  camera.attachControl(canvas, true);
+// Loaders
+const gltfLoader = new THREE.GLTFLoader();
 
-  const light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), scene);
+// Scene and Camera
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+  75,
+  viewer.clientWidth / viewer.clientHeight,
+  0.1,
+  1000
+);
 
-  return scene;
+// Renderer
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(viewer.clientWidth, viewer.clientHeight);
+viewer.appendChild(renderer.domElement);
+
+// Controls
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+// Light
+const light = new THREE.HemisphereLight(0xffffff, 0x444444);
+light.position.set(0, 20, 0);
+scene.add(light);
+
+// Animate background
+const backgroundCanvas = document.createElement("canvas");
+const backgroundContext = backgroundCanvas.getContext("2d");
+
+backgroundCanvas.width = window.innerWidth;
+backgroundCanvas.height = window.innerHeight;
+
+const backgroundImg = new Image();
+backgroundImg.src = "https://i.imgur.com/7pr8XqT.gif";
+
+backgroundImg.onload = () => {
+  const pattern = backgroundContext.createPattern(backgroundImg, "repeat");
+  backgroundContext.fillStyle = pattern;
+  backgroundContext.fillRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+};
+
+const backgroundTexture = new THREE.CanvasTexture(backgroundCanvas);
+backgroundTexture.wrapS = THREE.RepeatWrapping;
+backgroundTexture.wrapT = THREE.RepeatWrapping;
+backgroundTexture.repeat.set(2, 2);
+
+const backgroundPlaneGeometry = new THREE.PlaneGeometry(10, 10, 10, 10);
+const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture, transparent: true });
+const backgroundPlane = new THREE.Mesh(backgroundPlaneGeometry, backgroundMaterial);
+backgroundPlane.rotation.x = -Math.PI / 2;
+backgroundPlane.position.y = -1;
+scene.add(backgroundPlane);
+
+function animateBackground() {
+  backgroundCanvas.width = window.innerWidth;
+  backgroundCanvas.height = window.innerHeight;
+
+  backgroundContext.fillStyle = backgroundMaterial.color.getStyle();
+  backgroundContext.fillRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+
+  backgroundContext.drawImage(backgroundImg, 0, 0, backgroundCanvas.width, backgroundCanvas.height);
+
+  backgroundTexture.needsUpdate = true;
 }
 
-const scene = createScene();
-
-// Resize the engine on window resize
-window.addEventListener('resize', function() {
-  engine.resize();
+// Resize Renderer on window resize
+window.addEventListener("resize", () => {
+  renderer.setSize(viewer.clientWidth, viewer.clientHeight);
+  camera.aspect = viewer.clientWidth / viewer.clientHeight;
+  camera.updateProjectionMatrix();
 });
 
-// Handle file input change event
-const fileInput = document.getElementById('fileInput');
-fileInput.addEventListener('change', function(event) {
-  const file = event.target.files[0];
-  if (!file) {
-    return;
-  }
-
-  // Load the GLB file
-  const reader = new FileReader();
-  reader.addEventListener('load', function(event) {
-    const arrayBuffer = event.target.result;
-    BABYLON.SceneLoader.ImportMesh('', '', arrayBuffer, scene, function(meshes) {
-      // Remove the previous mesh (if any)
-      scene.meshes.forEach(function(mesh) {
-        mesh.dispose();
+// Load model on file input change
+fileInput.addEventListener("change", () => {
+  const file = fileInput.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const dataURL = reader.result;
+      gltfLoader.load(dataURL, (gltf) => {
+        scene.add(gltf.scene);
       });
-
-      // Position the mesh at the center of the scene
-      const mesh = meshes[0];
-      mesh.position = new BABYLON.Vector3(0, 0, 0);
-
-      // Resize the mesh to fit the viewport
-      const boundingBox = mesh.getBoundingInfo().boundingBox;
-      const size = boundingBox.maximum.subtract(boundingBox.minimum);
-      const maxSize = Math.max(size.x, size.y, size.z);
-      const scale = 1 / maxSize;
-      mesh.scaling = new BABYLON.Vector3(scale, scale, scale);
-    });
-  });
-  reader.readAsArrayBuffer(file);
+    };
+  }
 });
+
+// Render loop
+function animate() {
+  requestAnimationFrame(animate);
+  animateBackground();
+  renderer.render(scene, camera);
+  controls.update();
+}
+animate();
 
