@@ -2,20 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GLB Viewer</title>
-  <link rel="stylesheet" href="style.css">
+  <title>3D Model Viewer</title>
+  <style>
+    body {
+      background-color: #1e1e1e;
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+    
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    
+    .model-container {
+      position: relative;
+      width: 500px;
+      height: 500px;
+    }
+    
+    .model-loading-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      height: 5px;
+      background-color: #ff6a00;
+    }
+    
+    .model-loading-text {
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    
+    #file-input {
+      display: none;
+    }
+    
+    .import-button {
+      padding: 10px 20px;
+      background-color: #ff6a00;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    
+    .import-button:hover {
+      background-color: #ff8a4a;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>GLB Viewer</h1>
-  </header>
-  <main>
-    <div id="loading-bar-container">
-      <div id="loading-bar"></div>
+  <div class="container">
+    <div class="model-container">
+      <canvas id="model-canvas"></canvas>
+      <div class="model-loading-bar"></div>
+      <div class="model-loading-text">Loading model...</div>
     </div>
-    <div id="model-container"></div>
-  </main>
+    <button class="import-button" onclick="document.getElementById('file-input').click()">Import GLB File</button>
+    <input type="file" id="file-input" accept=".glb" onchange="handleFileUpload()"/>
+  </div>
   <script src="app.js"></script>
 </body>
 </html>
-
