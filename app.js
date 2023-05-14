@@ -1,78 +1,84 @@
-// Select the canvas element
-const canvas = document.querySelector('canvas');
-
-// Initialize the scene
-const scene = new THREE.Scene();
-
-// Initialize the camera
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 10);
-
-// Initialize the renderer
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-
-// Create a new instance of GLTFLoader
-const loader = new THREE.GLTFLoader();
-
-// Load the model
-function loadModel(file) {
-  loader.load(
-    file,
-    function (gltf) {
-      // Add the model to the scene
-      scene.add(gltf.scene);
-    },
-    function (xhr) {
-      // Display the loading progress
-      console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
-    },
-    function (error) {
-      // Display an error message
-      console.error('Failed to load model', error);
+// Initialize Cesium Viewer
+var viewer = new Cesium.Viewer('cesiumContainer', {
+  animation: false,
+  timeline: false,
+  sceneModePicker: false,
+  baseLayerPicker: false,
+  geocoder: false,
+  homeButton: false,
+  navigationHelpButton: false,
+  fullscreenButton: false,
+  vrButton: false,
+  selectionIndicator: false,
+  infoBox: false,
+  shouldAnimate: true,
+  skyBox: false,
+  skyAtmosphere: false,
+  contextOptions: {
+    webgl: {
+      alpha: false
     }
-  );
-}
-
-// Handle the file upload
-const fileUpload = document.getElementById('file-upload');
-fileUpload.addEventListener('change', function (event) {
-  const file = event.target.files[0];
-  const reader = new FileReader();
-  reader.onload = function (event) {
-    const contents = event.target.result;
-    loadModel(contents);
-  };
-  reader.readAsDataURL(file);
-});
-
-// Initialize the controls
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-// Initialize the clock
-const clock = new THREE.Clock();
-
-// Create a new instance of AnimationMixer
-let mixer;
-loader.load('animations/model.gltf', function (gltf) {
-  // Load the animations
-  mixer = new THREE.AnimationMixer(gltf.scene);
-  gltf.animations.forEach((clip) => {
-    mixer.clipAction(clip).play();
-  });
-  scene.add(gltf.scene);
-});
-
-// Render the scene
-function render() {
-  requestAnimationFrame(render);
-  const delta = clock.getDelta();
-  if (mixer) {
-    mixer.update(delta);
   }
-  renderer.render(scene, camera);
-}
+});
 
-render();
+// Add a blue box to the scene
+var entity = viewer.entities.add({
+  name: 'Blue box',
+  position: Cesium.Cartesian3.fromDegrees(-75.59777, 40.03883),
+  box: {
+    dimensions: new Cesium.Cartesian3(400000.0, 300000.0, 500000.0),
+    material: Cesium.Color.BLUE.withAlpha(0.5),
+    outline: true,
+    outlineColor: Cesium.Color.BLACK
+  }
+});
+
+// Hide loading bar and show viewport container when model is ready
+viewer.scene.globe.tileLoadProgressEvent.addEventListener(function () {
+  if (viewer.scene.globe.tilesLoaded === true) {
+    $('#loading-bar-container').hide();
+    $('#viewport-container').show();
+  }
+});
+
+// Handle file upload
+$('#upload-btn').on('change', function () {
+  var file = this.files[0];
+  var formData = new FormData();
+  formData.append('file', file);
+
+  // Show loading bar container
+  $('#loading-bar-container').show();
+
+  // Upload file
+  $.ajax({
+    url: '/upload',
+    type: 'POST',
+    data: formData,
+    processData: false,
+    contentType: false,
+    xhr: function () {
+      var xhr = $.ajaxSettings.xhr();
+      xhr.upload.onprogress = function (e) {
+        var progress = (e.loaded / e.total) * 100;
+        $('#loading-bar').css('width', progress + '%');
+      };
+      return xhr;
+    },
+    success: function (result) {
+      console.log(result);
+
+      // Load model
+      var tileset = new Cesium.Cesium3DTileset({
+        url: result.url
+      });
+
+      viewer.scene.primitives.add(tileset);
+
+      // Zoom to model
+      viewer.zoomTo(tileset);
+    }
+  });
+});
 
 
