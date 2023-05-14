@@ -1,165 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>GLB Viewer</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
-      background-color: #000000;
-      font-family: 'Courier New', Courier, monospace;
+      margin: 0;
+      padding: 0;
+      background-color: #1f1f1f;
+      font-family: "Courier New", monospace;
     }
-
-    .container {
+    
+    h1 {
+      color: #b4b4b4;
+      text-align: center;
+      margin-top: 50px;
+    }
+    
+    #container {
+      margin: 0 auto;
+      width: 800px;
+      height: 600px;
+      border: 5px solid #b4b4b4;
+      background-color: #3c3c3c;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #viewport {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+    }
+    
+    #progress {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 20px;
+      background-color: #b4b4b4;
+      border: 2px solid #3c3c3c;
+    }
+    
+    #progress-bar {
+      height: 100%;
+      background-color: #3c3c3c;
+      width: 0%;
+    }
+    
+    #button-container {
+      margin: 20px auto;
+      width: 200px;
       display: flex;
-      flex-direction: column;
       justify-content: center;
-      align-items: center;
-      height: 100vh;
     }
-
-    .button {
-      padding: 10px;
-      background-color: #3366cc;
-      color: #ffffff;
+    
+    button {
+      background-color: #b4b4b4;
+      color: #3c3c3c;
       border: none;
-      border-radius: 5px;
-      font-size: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
       cursor: pointer;
     }
-
-    .button:hover {
-      background-color: #235da3;
-    }
-
-    #progressbar {
-      width: 100%;
-      height: 30px;
-      background-color: #222222;
-      border-radius: 5px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-
-    #progressbar > div {
-      height: 100%;
-      background-color: #3366cc;
-      border-radius: 5px;
+    
+    button:hover {
+      background-color: #3c3c3c;
+      color: #b4b4b4;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1 style="color: #ffffff;">GLB Viewer</h1>
-    <div>
-      <input type="file" id="file-input" accept=".glb" style="display:none;" />
-      <label for="file-input" class="button">Import GLB File</label>
+  <h1>GLB Viewer</h1>
+  <div id="container">
+    <canvas id="viewport"></canvas>
+    <div id="progress">
+      <div id="progress-bar"></div>
     </div>
-    <canvas id="viewport" width="800" height="600"></canvas>
-    <div id="progressbar">
-      <div></div>
-    </div>
-    <div>
-      <button id="display-button" class="button" style="display:none;">Display Model</button>
-    </div>
+  </div>
+  <div id="button-container">
+    <button id="import-button">Import GLB</button>
   </div>
 
   <script src="app.js"></script>
-
-  <script>
-    // Get the elements
-    const fileInput = document.getElementById('file-input');
-    const displayButton = document.getElementById('display-button');
-    const progressBar = document.querySelector('#progressbar div');
-    const canvas = document.getElementById('viewport');
-
-    // Listen for file selection
-    fileInput.addEventListener('change', (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      // Reset progress bar
-      progressBar.style.width = '0%';
-
-      // Hide display button
-      displayButton.style.display = 'none';
-
-      // Load the GLB file
-      loadGLB(file, (progress) => {
-        // Update progress bar
-        progressBar.style.width = `${progress}%`;
-      })
-        .then((model) => {
-          // Show display button
-          displayButton.style.display = 'block';
-
-          // Set up display button
-          displayButton.addEventListener('click', () => {
-            displayModel(canvas, model);
-          });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    });
-  </script>
-
-  <script>
-    // Create the background animation
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const container = document.querySelector('.container');
-    const colors = ['#3366cc', '#ff6666', '#66cc66', '#f3c969'];
-    let offset = 0;
-
-    container.insertBefore(canvas, container.firstChild);
-
-// create a button to display the model
-const displayButton = document.createElement('button');
-displayButton.innerText = 'Display Model';
-displayButton.onclick = function() {
-  // display the model
-  renderer.render(scene, camera);
-};
-
-// add the button to the container
-container.appendChild(displayButton);
-
-// create a progress bar to show the loading progress
-const progressBar = document.createElement('div');
-progressBar.classList.add('progress-bar');
-const progress = document.createElement('div');
-progress.classList.add('progress');
-progressBar.appendChild(progress);
-container.appendChild(progressBar);
-
-// load the model
-const loader = new GLTFLoader();
-loader.load(
-  // resource URL
-  'models/ae1b9eb5e516c46b760028eb98bd7df979687af77ce8fb0117d06f6125ed0f12.glb',
-  // called when the resource is loaded
-  function(gltf) {
-    scene.add(gltf.scene);
-    progressBar.style.display = 'none';
-  },
-  // called while loading is progressing
-  function(xhr) {
-    const percent = (xhr.loaded / xhr.total) * 100;
-    progress.style.width = percent.toFixed(2) + '%';
-  },
-  // called when loading has errors
-  function(error) {
-    console.error(error);
-  }
-);
-
-// render loop
-function animate() {
-  requestAnimationFrame(animate);
-  // update the controls
-  controls.update();
-  // render the scene
-  renderer.render(scene, camera);
-}
-animate();
+</body>
+</html>
