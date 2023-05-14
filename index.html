@@ -1,118 +1,65 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>NERF Viewer</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
-    <style>
-      /* Reset default styles */
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      
-      /* Page layout */
-      body {
-        font-family: 'Roboto', sans-serif;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #333;
-        color: #fff;
-      }
-      
-      .container {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        width: 90%;
-        max-width: 600px;
-        margin: 0 auto;
-      }
-      
-      .title {
-        font-size: 36px;
-        margin-bottom: 20px;
-        text-align: center;
-      }
-      
-      /* Dropzone */
-      .dropzone {
-        border: 2px dashed #ccc;
-        border-radius: 10px;
-        width: 100%;
-        max-width: 500px;
-        height: 200px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        transition: border-color 0.3s ease-in-out;
-      }
-      
-      .dropzone:hover {
-        border-color: #fff;
-      }
-      
-      .dropzone-text {
-        font-size: 24px;
-        margin-bottom: 10px;
-      }
-      
-      /* Loading bar */
-      .loading-bar-container {
-        width: 100%;
-        max-width: 500px;
-        height: 10px;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        margin-top: 20px;
-        overflow: hidden;
-      }
-      
-      .loading-bar {
-        height: 100%;
-        width: 0;
-        background-color: #fff;
-        transition: width 0.3s ease-in-out;
-      }
-      
-      /* Error message */
-      .error-message {
-        color: red;
-        margin-top: 10px;
-        text-align: center;
-      }
-      
-      /* Viewer */
-      #viewer {
-        width: 100%;
-        max-width: 500px;
-        height: 400px;
-        margin-top: 20px;
-      }
-    </style>
-  </head>
-  
-  <body>
-    <div class="container">
-      <h1 class="title">NERF Viewer</h1>
-      <div class="dropzone" id="dropzone">
-        <p class="dropzone-text">Drag and drop a NERF file here or click to select a file.</p>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>NERF GLB Viewer</title>
+  <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.3/css/bulma.min.css" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <section class="hero is-primary">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title">
+          NERF GLB Viewer
+        </h1>
+        <h2 class="subtitle">
+          View and interact with NERF GLB files
+        </h2>
       </div>
-      <div class="loading-bar-container">
-        <div class="loading-bar" id="loading-bar"></div>
-      </div>
-      <div class="error-message" id="error-message"></div>
-      <canvas id="viewer"></canvas>
     </div>
-    
-    <script src="app.js"></script>
-  </body>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div class="columns">
+        <div class="column is-two-thirds">
+          <div class="gl-wrapper">
+            <canvas id="gl-canvas" width="800" height="600"></canvas>
+          </div>
+        </div>
+        <div class="column">
+          <div class="upload-box">
+            <h3 class="title is-4">Import GLB file</h3>
+            <div class="file has-name is-fullwidth">
+              <label class="file-label">
+                <input class="file-input" type="file" name="glb-file" accept=".glb" id="glb-input">
+                <span class="file-cta">
+                  <span class="file-icon">
+                    <i class="fas fa-upload"></i>
+                  </span>
+                  <span class="file-label">
+                    Choose a file…
+                  </span>
+                </span>
+                <span class="file-name" id="glb-filename">
+                  No file selected
+                </span>
+              </label>
+            </div>
+            <progress class="progress is-primary is-hidden" id="upload-progress" value="0" max="100"></progress>
+            <progress class="progress is-link is-hidden" id="process-progress" value="0" max="100"></progress>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="./app.js"></script>
+</body>
+
 </html>
+
