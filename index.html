@@ -1,92 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>GLB Viewer</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
-        background-color: #000;
-        overflow: hidden;
-      }
+<html>
+<head>
+  <title>GLB Viewer</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      background-color: #000000;
+      font-family: 'Courier New', Courier, monospace;
+    }
 
-      canvas {
-        width: 100%;
-        height: 100%;
-      }
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-      .progress-container {
-        width: 100%;
-        height: 20px;
-        background-color: #333;
-        margin-top: 10px;
-      }
+    .button {
+      padding: 10px;
+      background-color: #3366cc;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      font-size: 20px;
+      cursor: pointer;
+    }
 
-      .progress-bar {
-        height: 100%;
-        background-color: #4caf50;
-        width: 0%;
-      }
+    .button:hover {
+      background-color: #235da3;
+    }
 
-      #import-btn {
-        font-size: 16px;
-        background-color: #333;
-        color: #fff;
-        padding: 10px;
-        border: none;
-        border-radius: 5px;
-        margin-top: 20px;
-        cursor: pointer;
-      }
+    #progressbar {
+      width: 100%;
+      height: 30px;
+      background-color: #222222;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
 
-      #import-btn:hover {
-        background-color: #4caf50;
-      }
-
-      .retro-bg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: -1;
-        width: 100%;
-        height: 100%;
-        background-color: #000;
-        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAfklEQVR42mP8X8zg8DwQMY2GJgYGCg4MDAwB+CGcvgiUcRMFguIqBlQYBF6oqJ6BZAxgaGBlYXIBrCIz8YoMzAwMjIwMhYxMjQ2MDFgIBCD8QTVFSE5UAAAAAElFTkSuQmCC");
-        -webkit-animation: animatedBackground 50s linear infinite;
-        animation: animatedBackground 50s linear infinite;
-      }
-
-      @-webkit-keyframes animatedBackground {
-        from {
-          background-position: 0 0;
-        }
-        to {
-          background-position: 100% 0;
-        }
-      }
-
-      @keyframes animatedBackground {
-        from {
-          background-position: 0 0;
-        }
-        to {
-          background-position: 100% 0;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="retro-bg"></div>
-    <div id="progress-container" class="progress-container">
-      <div id="progress-bar" class="progress-bar"></div>
+    #progressbar > div {
+      height: 100%;
+      background-color: #3366cc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 style="color: #ffffff;">GLB Viewer</h1>
+    <div>
+      <input type="file" id="file-input" accept=".glb" style="display:none;" />
+      <label for="file-input" class="button">Import GLB File</label>
     </div>
-    <button id="import-btn">Import GLB file</button>
-    <canvas id="canvas"></canvas>
+    <canvas id="viewport" width="800" height="600"></canvas>
+    <div id="progressbar">
+      <div></div>
+    </div>
+    <div>
+      <button id="display-button" class="button" style="display:none;">Display Model</button>
+    </div>
+  </div>
 
-    <script src="app.js"></script>
-  </body>
-</html>
+  <script src="app.js"></script>
+
+  <script>
+    // Get the elements
+    const fileInput = document.getElementById('file-input');
+    const displayButton = document.getElementById('display-button');
+    const progressBar = document.querySelector('#progressbar div');
+    const canvas = document.getElementById('viewport');
+
+    // Listen for file selection
+    fileInput.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // Reset progress bar
+      progressBar.style.width = '0%';
+
+      // Hide display button
+      displayButton.style.display = 'none';
+
+      // Load the GLB file
+      loadGLB(file, (progress) => {
+        // Update progress bar
+        progressBar.style.width = `${progress}%`;
+      })
+        .then((model) => {
+          // Show display button
+          displayButton.style.display = 'block';
+
+          // Set up display button
+          displayButton.addEventListener('click', () => {
+            displayModel(canvas, model);
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
+  </script>
+
+  <script>
+    // Create the background animation
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.querySelector('.container');
+    const colors = ['#3366cc', '#ff6666', '#66cc66', '#f3c969'];
+    let offset = 0;
+
+    container.insertBefore(canvas, container.firstChild);
+
+// create a button to display the model
+const displayButton = document.createElement('button');
+displayButton.innerText = 'Display Model';
+displayButton.onclick = function() {
+  // display the model
+  renderer.render(scene, camera);
+};
+
+// add the button to the container
+container.appendChild(displayButton);
+
+// create a progress bar to show the loading progress
+const progressBar = document.createElement('div');
+progressBar.classList.add('progress-bar');
+const progress = document.createElement('div');
+progress.classList.add('progress');
+progressBar.appendChild(progress);
+container.appendChild(progressBar);
+
+// load the model
+const loader = new GLTFLoader();
+loader.load(
+  // resource URL
+  'models/ae1b9eb5e516c46b760028eb98bd7df979687af77ce8fb0117d06f6125ed0f12.glb',
+  // called when the resource is loaded
+  function(gltf) {
+    scene.add(gltf.scene);
+    progressBar.style.display = 'none';
+  },
+  // called while loading is progressing
+  function(xhr) {
+    const percent = (xhr.loaded / xhr.total) * 100;
+    progress.style.width = percent.toFixed(2) + '%';
+  },
+  // called when loading has errors
+  function(error) {
+    console.error(error);
+  }
+);
+
+// render loop
+function animate() {
+  requestAnimationFrame(animate);
+  // update the controls
+  controls.update();
+  // render the scene
+  renderer.render(scene, camera);
+}
+animate();
