@@ -1,139 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slick Rick NERF</title>
-  <script src="https://cesium.com/downloads/cesiumjs/releases/1.87/Build/Cesium/Cesium.js"></script>
-  <link href="https://cesium.com/downloads/cesiumjs/releases/1.87/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <style>
-    body {
-      background-color: #000000;
-      color: #ffffff;
-      font-family: 'Courier New', Courier, monospace;
-      text-align: center;
-    }
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>3D Viewer</title>
 
-    h1 {
-      margin-top: 50px;
-      font-size: 40px;
-    }
+  <!-- Three.js library -->
+  <script src="https://cdn.rawgit.com/mrdoob/three.js/master/build/three.min.js"></script>
 
-    #upload-btn {
-      background-color: #5CFF8A;
-      border: none;
-      color: #000000;
-      padding: 15px 32px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 20px;
-      margin: 50px;
-      cursor: pointer;
-      border-radius: 10px;
-    }
+  <!-- STLLoader.js library -->
+  <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/loaders/STLLoader.js"></script>
 
-    #upload-btn:hover {
-      background-color: #00FF55;
-      transition: 0.3s;
-    }
+  <!-- OrbitControls.js library -->
+  <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/OrbitControls.js"></script>
 
-    #loading-bar-container {
-      display: none;
-      width: 50%;
-      margin: auto;
-      margin-top: 50px;
-      text-align: center;
-    }
+  <!-- JQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-    #loading-bar {
-      width: 0%;
-      height: 20px;
-      background-color: #5CFF8A;
-      border-radius: 10px;
-      transition: 0.2s;
-    }
+  <!-- Bootstrap library -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/XpG2g/i5t7ZpZ6T"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
 
-    #loading-text {
-      font-size: 20px;
-      margin-top: 10px;
-    }
-
-    #viewport-container {
-      display: none;
-      width: 80%;
-      height: 600px;
-      margin: auto;
-      margin-top: 50px;
-    }
-  </style>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-  <h1>Slick Rick NERF</h1>
-
-  <button id="upload-btn">Import NERF File</button>
-
-  <div id="loading-bar-container">
-    <div id="loading-bar"></div>
-    <div id="loading-text">Uploading NERF file...</div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 offset-md-3">
+        <h1 class="text-center">3D Model Viewer</h1>
+        <hr>
+        <form id="upload-form">
+          <div class="form-group">
+            <label for="file-input">Select a 3D model file to upload:</label>
+            <input type="file" id="file-input" accept=".stl,.obj,.fbx,.gltf,.glb">
+          </div>
+          <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+        <hr>
+        <div id="loading-bar" class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <div id="model-viewer-container"></div>
+      </div>
+    </div>
   </div>
-
-  <div id="viewport-container">
-    <div id="cesiumContainer"></div>
-  </div>
-
-  <script>
-    // Upload button
-    $('#upload-btn').on('click', function () {
-      $('<input/>').attr('type', 'file').on('change', function () {
-        var file = this.files[0];
-        var formData = new FormData();
-        formData.append('file', file);
-
-        // Show loading bar container
-        $('#loading-bar-container').show();
-
-        // Upload file
-        $.ajax({
-          url: '/upload',
-          type: 'POST',
-          data: formData,
-          processData: false,
-          contentType: false,
-          xhr: function () {
-            var xhr = $.ajaxSettings.xhr();
-            xhr.upload.onprogress = function (e) {
-              var progress = (e.loaded / e.total) * 100;
-              $('#loading-bar').css('width', progress + '%');
-            };
-            return xhr;
-          },
-          success: function (data) {
-        // Hide loading bar container
-        $('#loading-bar-container').hide();
-
-        // Show viewport container
-        $('#viewport-container').show();
-
-        // Initialize Cesium viewer
-        var viewer = new Cesium.Viewer('cesiumContainer', {
-          terrainProvider: Cesium.createWorldTerrain()
-        });
-
-        // Load NERF data
-        var dataSource = new Cesium.CzmlDataSource();
-        dataSource.load(data);
-        viewer.dataSources.add(dataSource);
-      },
-      error: function (xhr, status, error) {
-        console.error(error);
-      }
-    }).done(function () {
-      $(this).val('');
-    });
-  }).click();
-});
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@glTF-Transform/core@2.0.0/dist/core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@glTF-Transform/extensions@2.0.0/dist/extensions.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@glTF-Transform/cli@2.0.0/dist/cli.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/loaders/STLLoader.js"></script>
+  <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/loaders/OBJLoader.js"></script>
+  <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/loaders/FBXLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@pixiv/three-gltf-loader@1.1.2/dist/three-gltf-loader.min.js"></script>
+  <script src="/js/app.js"></script>
 </body>
+    <!-- Display section -->
+    <div class="display-section">
+      <div class="model-frame">
+        <div id="model-viewer"></div>
+      </div>
+      <div class="loading-section">
+        <div id="loading-bar"></div>
+        <div id="loading-text">Loading...</div>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/@modelviewer/core@1.4.0/dist/model-viewer.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/app.js"></script>
+
+  </body>
 </html>
