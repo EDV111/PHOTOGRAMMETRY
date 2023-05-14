@@ -1,65 +1,28 @@
+<!DOCTYPE html>
 <html>
-
 <head>
-  <title>3D Viewer</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-    crossorigin="anonymous">
-  <style>
-    body {
-      background-image: url("https://i.imgur.com/eG1zyrs.png");
-      background-size: cover;
-    }
-
-    #canvas {
-      background-color: #000;
-      width: 100%;
-      height: 100%;
-      position: absolute;
-    }
-
-    #canvas-frame {
-      position: relative;
-      height: 0;
-      width: 0;
-      padding-bottom: 50%;
-      overflow: hidden;
-      border: 10px solid #fff;
-    }
-
-    #loading-bar {
-      width: 100%;
-      height: 20px;
-      background-color: #ddd;
-      position: relative;
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-
-    #loading-bar:before {
-      content: "";
-      display: block;
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      background-color: #007bff;
-      animation: loading 2s infinite;
-    }
-
-    @keyframes loading {
-      0% {
-        width: 0;
-      }
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat.gui/0.7.7/dat.gui.min.js"></script>
-    <script src="./js/OrbitControls.js"></script>
-    <script src="./js/OBJLoader.js"></script>
-    <script src="./js/MTLLoader.js"></script>
-    <script src="./js/GLTFLoader.js"></script>
-    <script src="./js/index.js"></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SLICK RICK NERF</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<div class="container">
+		<h1>SLICK RICK NERF</h1>
+		<canvas id="canvas"></canvas>
+		<div id="loader-wrapper">
+			<div id="loader"></div>
+			<div class="loader-section section-left"></div>
+			<div class="loader-section section-right"></div>
+		</div>
+		<div id="upload-btn-wrapper">
+			<button class="btn">IMPORT 3D MODEL</button>
+			<input type="file" name="modelFile" id="modelFile">
+		</div>
+		<div id="viewport"></div>
+	</div>
+	<script src="https://cdn.babylonjs.com/babylon.js"></script>
+	<script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+	<script src="app.js"></script>
 </body>
-
 </html>
