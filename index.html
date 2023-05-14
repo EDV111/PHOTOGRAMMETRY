@@ -1,22 +1,19 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>NERF GLB Viewer</title>
+    <title>My NERF Website</title>
   </head>
   <body>
-    <div>
-      <h1>NERF GLB Viewer</h1>
-      <form>
-        <input type="file" id="file-input">
-        <button type="button" onclick="processFile()">View GLB File</button>
-      </form>
-      <div id="loading-bar-upload"></div>
-      <div id="loading-bar-process"></div>
-      <div id="viewer-container"></div>
+    <h1>Welcome to my NERF website!</h1>
+    <input type="file" id="file-input">
+    <button id="process-button">Process File</button>
+    <div id="loading-bar" style="display:none;">
+      <div id="progress-bar"></div>
     </div>
+    <div id="viewer-container"></div>
+    
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
-
-
-
