@@ -42,4 +42,3 @@ createScene();
 window.addEventListener("resize", () => {
   engine.resize();
 });
-
