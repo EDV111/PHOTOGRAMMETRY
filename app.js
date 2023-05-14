@@ -1,32 +1,38 @@
-// Set up the scene, camera, and renderer
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+const progressBar = document.querySelector('.progress-bar');
 
-// Set up the loading manager and progress bar
-const loadingManager = new THREE.LoadingManager();
-const progressBar = document.getElementById("loading-bar");
+const modelViewer = document.querySelector('model-viewer');
 
-loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
-  const progress = itemsLoaded / itemsTotal;
-  progressBar.style.width = `${progress * 100}%`;
-};
+function showProgress() {
+  progressBar.style.display = 'block';
+}
 
-// Load the GLB model and add it to the scene
-const loader = new THREE.GLTFLoader(loadingManager);
-loader.load('model.glb', (gltf) => {
-  const model = gltf.scene;
-  scene.add(model);
+function hideProgress() {
+  progressBar.style.display = 'none';
+}
 
-  // Position the camera to frame the model
-  const box = new THREE.Box3().setFromObject(model);
-  const center = box.getCenter(new THREE.Vector3());
-  const size = box.getSize(new THREE.Vector3());
-  camera.position.set(center.x, center.y, center.z + size.z);
-  camera.lookAt(center);
+function updateProgress(event) {
+  if (event.lengthComputable) {
+    const percentComplete = (event.loaded / event.total) * 100;
+    progressBar.style.width = `${percentComplete}%`;
+  }
+}
 
-  // Render the scene
-  renderer.render(scene, camera);
-});
+function importModel() {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '.glb';
+  fileInput.onchange = () => {
+    showProgress();
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      modelViewer.src = event.target.result;
+      hideProgress();
+    };
+    reader.onprogress = updateProgress;
+    reader.readAsDataURL(file);
+  };
+  fileInput.click();
+}
+
+document.querySelector('.import-button').addEventListener('click', importModel);
