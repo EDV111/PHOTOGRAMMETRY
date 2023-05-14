@@ -1,79 +1,44 @@
-const canvas = document.querySelector("#canvas");
+const canvas = document.getElementById("canvas");
 const engine = new BABYLON.Engine(canvas, true);
-const scene = new BABYLON.Scene(engine);
-const loader = document.querySelector("#loader-wrapper");
 
-function showLoader() {
-  loader.style.display = "block";
-}
+// Create scene
+const createScene = async () => {
+  // Create a basic BJS Scene object
+  const scene = new BABYLON.Scene(engine);
 
-function hideLoader() {
-  loader.style.display = "none";
-}
+  // Create a FreeCamera, and set its position to (x:0, y:5, z:-10)
+  const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
 
-function createScene(model) {
-  showLoader();
+  // Target the camera to scene origin
+  camera.setTarget(BABYLON.Vector3.Zero());
 
-  const assetsManager = new BABYLON.AssetsManager(scene);
-  const meshTask = assetsManager.addMeshTask("model task", "", "./", model);
-  meshTask.onSuccess = (task) => {
-    hideLoader();
+  // Attach the camera to the canvas
+  camera.attachControl(canvas, false);
 
-    const modelMesh = task.loadedMeshes[0];
-    modelMesh.position = BABYLON.Vector3.Zero();
+  // Create a basic light, aiming 0,1,0 - meaning, to the sky
+  const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
 
-    const camera = new BABYLON.ArcRotateCamera(
-      "camera",
-      -Math.PI / 2,
-      Math.PI / 2,
-      2,
-      new BABYLON.Vector3(0, 0, 0),
-      scene
-    );
-    camera.attachControl(canvas, true);
+  // Load 3D model
+  const assetUrl = "./models/nerf-gun.babylon";
+  const mesh = await BABYLON.SceneLoader.ImportMeshAsync("", assetUrl, "", scene);
 
-    const light = new BABYLON.HemisphericLight(
-      "light",
-      new BABYLON.Vector3(0, 1, 0),
-      scene
-    );
+  // Position the mesh
+  mesh.position = new BABYLON.Vector3(0, 0, 0);
 
-    scene.createDefaultEnvironment({
-      createGround: false,
-      createSkybox: false,
-    });
+  // Scale the mesh
+  const scalingFactor = 0.05;
+  mesh.scaling = new BABYLON.Vector3(scalingFactor, scalingFactor, scalingFactor);
 
-    const modelMaterial = new BABYLON.StandardMaterial("model material", scene);
-    modelMesh.material = modelMaterial;
+  // Render loop
+  engine.runRenderLoop(() => {
+    scene.render();
+  });
+};
 
-    engine.runRenderLoop(() => {
-      scene.render();
-    });
-  };
+// Call createScene function
+createScene();
 
-  assetsManager.onProgress = (remainingCount, totalCount, lastFinishedTask) => {
-    const loadingStatus =
-      (totalCount - remainingCount) / totalCount * 100;
-    console.log(`${loadingStatus}% of assets loaded`);
-
-    const loaderBar = document.querySelector("#loader");
-    loaderBar.style.width = `${loadingStatus}%`;
-  };
-
-  assetsManager.load();
-}
-
-const modelFile = document.querySelector("#modelFile");
-modelFile.addEventListener("change", () => {
-  const file = modelFile.files[0];
-  const reader = new FileReader();
-  reader.readAsText(file);
-  reader.onload = () => {
-    const model = JSON.parse(reader.result);
-    createScene(model);
-  };
-});
-
+// Resize
 window.addEventListener("resize", () => {
   engine.resize();
 });
