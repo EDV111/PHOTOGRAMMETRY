@@ -1,40 +1,59 @@
-// Get the import button element
-const importBtn = document.getElementById('import');
+let gltfLoader = new THREE.GLTFLoader();
 
-// Add a change event listener to the file input element
-const fileInput = document.getElementById('file-input');
+let fileInput = document.getElementById('file-input');
 fileInput.addEventListener('change', (event) => {
-  const file = event.target.files[0];
-  
-  // Check if the file is a glb file
-  if (file.type !== 'model/gltf-binary') {
-    alert('Invalid file type. Please select a .glb file.');
-    return;
-  }
-  
-  // Create a URL for the file and load it into the scene
-  const fileURL = URL.createObjectURL(file);
-  const loader = new THREE.GLTFLoader();
-  loader.load(
-    fileURL,
-    (gltf) => {
-      scene.add(gltf.scene);
-    },
-    (xhr) => {
-      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    },
-    (error) => {
-      console.error('An error happened', error);
-    }
-  );
+  let file = event.target.files[0];
+  let reader = new FileReader();
+
+  reader.addEventListener('load', (event) => {
+    let gltfData = event.target.result;
+
+    gltfLoader.parse(gltfData, '', (gltf) => {
+      let model = gltf.scene;
+      let bbox = new THREE.Box3().setFromObject(model);
+      let center = bbox.getCenter(new THREE.Vector3());
+      let size = bbox.getSize(new THREE.Vector3());
+      let distance = Math.max(size.x, size.y, size.z);
+      let fov = 45;
+      let aspect = window.innerWidth / window.innerHeight;
+      let near = 0.1;
+      let far = distance * 100;
+      let camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+      camera.position.set(center.x, center.y, distance * 2.5);
+
+      let controls = new THREE.OrbitControls(camera, document.getElementById('viewport'));
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.screenSpacePanning = false;
+      controls.minDistance = distance;
+      controls.maxDistance = distance * 10;
+      controls.maxPolarAngle = Math.PI / 2;
+
+      let ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      let directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(-1, 1, 1).normalize();
+
+      let scene = new THREE.Scene();
+      scene.add(model);
+      scene.add(ambientLight);
+      scene.add(directionalLight);
+
+      let renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.getElementById('viewport').appendChild(renderer.domElement);
+
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+        controls.update();
+      }
+
+      animate();
+    });
+  });
+
+  reader.readAsArrayBuffer(file);
 });
-
-// Animate the scene
-function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
-
-animate();
 
 
