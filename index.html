@@ -1,60 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Slick Rick View Port</title>
     <style>
       body {
         background-color: #000;
-        color: #fff;
-        font-family: monospace;
+      }
+      .container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .pixel-art {
+        width: 600px;
+        height: 400px;
+        background-image: url('pixel-snow.gif');
+        background-repeat: repeat;
+        position: relative;
+      }
+      .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(255, 255, 255, 0.5);
+        z-index: 1;
+      }
+      .viewport {
+        width: 600px;
+        height: 400px;
+        position: relative;
+        z-index: 2;
+      }
+      .import-button {
+        background-color: white;
+        color: black;
+        padding: 8px 16px;
         font-size: 16px;
-        margin: 0;
-        padding: 0;
-      }
-      #canvas-container {
-        height: 80vh;
-        width: 80vw;
-        margin: 0 auto;
-      }
-      #upload-container {
-        margin-top: 20px;
-        text-align: center;
-      }
-      #upload-container label {
-        display: block;
-        margin-bottom: 10px;
-        font-size: 18px;
-      }
-      #upload-container input[type="file"] {
-        display: none;
-      }
-      #upload-container button {
-        background-color: #fff;
+        border-radius: 8px;
         border: none;
-        border-radius: 5px;
-        color: #000;
         cursor: pointer;
-        font-size: 18px;
-        padding: 10px 20px;
-        transition: background-color 0.2s ease-in-out;
       }
-      #upload-container button:hover {
-        background-color: #555;
-        color: #fff;
+      .import-button:hover {
+        background-color: #ccc;
       }
     </style>
   </head>
   <body>
-    <h1>Slick Rick View Port</h1>
-    <div id="canvas-container"></div>
-    <div id="upload-container">
-      <label for="file-upload">Upload your 3D model in GLB format:</label>
-      <input id="file-upload" type="file" accept=".glb" />
-      <button id="upload-button">Upload</button>
+    <div class="container">
+      <div class="pixel-art">
+        <div class="loading">
+          <div class="lds-ripple"><div></div><div></div></div>
+        </div>
+        <div class="viewport"></div>
+      </div>
     </div>
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <div class="container">
+      <input type="file" id="file-input" style="display: none" accept=".glb">
+      <button class="import-button" onclick="document.getElementById('file-input').click()">Import</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@squoosh/browser@0.15.1/dist/squoosh.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
