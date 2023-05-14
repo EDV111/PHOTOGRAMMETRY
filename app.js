@@ -1,49 +1,70 @@
-const fileInput = document.getElementById("file-input");
-const viewerContainer = document.getElementById("viewer-container");
-const loadingBarUpload = document.getElementById("loading-bar-upload");
-const loadingBarProcess = document.getElementById("loading-bar-process");
+const inputElement = document.getElementById("fileInput");
+const loadingElement = document.getElementById("loading");
+const progressBarElement = document.getElementById("progressBar");
+const canvasElement = document.getElementById("canvas");
+const gltfLoader = new THREE.GLTFLoader();
+const renderer = new THREE.WebGLRenderer({ canvas: canvasElement });
 
-let gltfObject = null;
+function handleLoadProgress(xhr) {
+  if (xhr.lengthComputable) {
+    const percentComplete = (xhr.loaded / xhr.total) * 100;
+    progressBarElement.style.width = `${percentComplete}%`;
+  }
+}
 
-function processFile() {
-  if (!fileInput.files[0]) {
+function handleLoadError(error) {
+  console.error(`Error loading model: ${error}`);
+}
+
+function handleLoadFinish(gltf) {
+  loadingElement.style.display = "none";
+  const object = gltf.scene;
+  const box = new THREE.Box3().setFromObject(object);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const distance = Math.max(size.x, size.y, size.z) * 1.5;
+  object.position.x += (object.position.x - center.x) * -1;
+  object.position.y += (object.position.y - center.y) * -1;
+  object.position.z += (object.position.z - center.z) * -1;
+  camera.position.copy(center);
+  camera.position.z += distance;
+  camera.lookAt(center);
+  scene.add(object);
+}
+
+function handleInputChange(event) {
+  const file = event.target.files[0];
+  if (!file) {
     return;
   }
-  const reader = new FileReader();
-  reader.onloadstart = () => {
-    loadingBarUpload.innerHTML = "Uploading file...";
-  };
-  reader.onprogress = (event) => {
-    loadingBarUpload.innerHTML = `Uploading file... ${event.loaded} bytes uploaded.`;
-  };
-  reader.onload = async () => {
-    loadingBarUpload.innerHTML = "Upload complete.";
-    const arrayBuffer = reader.result;
-    const loader = new THREE.GLTFLoader();
-    const gltf = await new Promise((resolve) => loader.parse(arrayBuffer, "", resolve));
-    gltfObject = gltf.scene.children[0];
-    loadingBarProcess.innerHTML = "Processing GLB file...";
-    const box = new THREE.Box3().setFromObject(gltfObject);
-    const center = new THREE.Vector3();
-    box.getCenter(center);
-    gltfObject.position.sub(center); // center the object
-    gltfObject.rotateX(-Math.PI / 2); // rotate it to face upwards
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
-    viewerContainer.appendChild(renderer.domElement);
-    const camera = new THREE.PerspectiveCamera(45, viewerContainer.clientWidth / viewerContainer.clientHeight, 0.1, 1000);
-    camera.position.set(0, 0, 10);
-    camera.lookAt(0, 0, 0);
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableZoom = false;
-    controls.enablePan = false;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 2;
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
-    directionalLight.position.set(0, 1, 1).normalize();
-    const scene = new THREE.Scene();
-    scene.add(gltfObject);
-    scene.add(ambientLight);
-    scene
+  loadingElement.style.display = "block";
+  const url = URL.createObjectURL(file);
+  gltfLoader.load(url, handleLoadFinish, handleLoadProgress, handleLoadError);
+}
+
+inputElement.addEventListener("change", handleInputChange);
+
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+camera.position.z = 5;
+
+const scene = new THREE.Scene();
+
+const ambientLight = new THREE.AmbientLight(0xcccccc, 0.4);
+scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(0xffffff, 0.8);
+camera.add(pointLight);
+scene.add(camera);
+
+function render() {
+  requestAnimationFrame(render);
+  renderer.render(scene, camera);
+}
+
+render();
 
