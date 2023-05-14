@@ -1,107 +1,76 @@
-/* Global Styles */
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
 
 body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Press Start 2P', sans-serif;
-    background-color: #000;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
+  background-color: #3c3c3c;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 16px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
 h1 {
-    text-align: center;
-    font-size: 5em;
-    margin-top: 0.5em;
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 .container {
-    text-align: center;
-    position: relative;
-    z-index: 1;
-}
-/* Main container */
-.container {
-	margin: 0 auto;
-	text-align: center;
-	padding: 2rem;
-	max-width: 960px;
-}
-
-/* Title */
-h1 {
-	font-family: 'Press Start 2P', cursive;
-	font-size: 4rem;
-	margin: 2rem 0;
-	color: #fff;
-	text-shadow: 3px 3px #000;
-	text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
+  max-width: 960px;
+  height: 100%;
+  margin: 0 auto;
+  background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1847291/neon-bg.png');
+  background-size: cover;
+  position: relative;
 }
 
-/* Canvas */
 canvas {
-	width: 100%;
-	height: 50vh;
-	background-color: #3d3d3d;
-	margin: 2rem 0;
-	box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-}
-
-/* Upload button wrapper */
-#upload-btn-wrapper {
-	margin: 2rem 0;
-	position: relative;
-	overflow: hidden;
-	display: inline-block;
-}
-
-/* Upload button */
-.btn {
-	border: 2px solid #fff;
-	background-color: transparent;
-	color: #fff;
-	padding: 0.5rem 1.5rem;
-	font-size: 1.2rem;
-	font-weight: bold;
-	cursor: pointer;
-	outline: none;
-	transition: all 0.3s ease;
-}
-
-/* Upload button hover */
-.btn:hover {
-	background-color: #fff;
-	color: #000;
-}
-/*-------------------------------------*/
-/* LOADER                              */
-/*-------------------------------------*/
-
-#loader-wrapper {
-  position: fixed;
+  display: block;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+/* Loader */
+#loader-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #333;
   z-index: 1000;
 }
 
 #loader {
-  display: block;
+  display: inline-block;
+  width: 60px;
+  height: 60px;
   position: relative;
-  left: 50%;
-  top: 50%;
-  width: 150px;
-  height: 150px;
-  margin: -75px 0 0 -75px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  border-top-color: #3498db;
-  -webkit-animation: spin 2s linear infinite;
-  animation: spin 2s linear infinite;
+  border: 4px solid #f2f2f2;
+  animation: loader 2s infinite ease;
 }
 
 .loader-section {
@@ -109,7 +78,7 @@ canvas {
   top: 0;
   width: 51%;
   height: 100%;
-  background: #222;
+  background: #333;
   z-index: 1000;
 }
 
@@ -121,33 +90,38 @@ canvas {
   right: 0;
 }
 
-/*-------------------------------------*/
-/* IMPORT BUTTON                       */
-/*-------------------------------------*/
-
-#upload-btn-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
+@keyframes loader {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.btn {
-  display: inline-block;
-  background-color: #3498db;
-  border-radius: 8px;
-  padding: 10px 20px;
-  color: white;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.btn:hover {
-  background-color: #3cba54;
+/* Additional loader styles */
+#loader-wrapper.hide {
+  opacity: 0;
+  pointer-events: none;
 }
 
-#modelFile {
-  display: none;
+#loader-wrapper .loader-section {
+  transition: transform 1s ease-in-out;
+}
+
+#loader-wrapper.hide .loader-section.section-left {
+  transform: translateX(-100%);
+}
+
+#loader-wrapper.hide .loader-section.section-right {
+  transform: translateX(100%);
 }
