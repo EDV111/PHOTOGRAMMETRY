@@ -1,96 +1,101 @@
-$(document).ready(function () {
-  // Display 3D Model
-  function displayModel(file) {
-    var iframe = $('#model-display')[0];
-    var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+const container = document.getElementById('canvas-container');
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas });
 
-    iframeDoc.open();
-    iframeDoc.write('<!DOCTYPE html><html><head></head><body></body></html>');
-    iframeDoc.close();
+const fov = 75;
+const aspect = 2;  // the canvas default
+const near = 0.1;
+const far = 5;
+const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+camera.position.z = 2;
 
-    var loader = new THREE.GLTFLoader();
-    var camera, scene, renderer;
-    var model;
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-    function init() {
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x4e4e4e);
+const scene = new THREE.Scene();
 
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
-      camera.position.set(0, 0, 3);
+const boxWidth = 1;
+const boxHeight = 1;
+const boxDepth = 1;
+const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
-      var ambientLight = new THREE.AmbientLight(0xcccccc, 0.4);
-      scene.add(ambientLight);
+function addLights() {
+  const color = 0xFFFFFF;
+  const intensity = 1;
+  const light = new THREE.DirectionalLight(color, intensity);
+  light.position.set(-1, 2, 4);
+  scene.add(light);
+}
 
-      var pointLight = new THREE.PointLight(0xffffff, 0.8);
-      camera.add(pointLight);
-      scene.add(camera);
+function addBoxToScene(material) {
+  const cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+}
 
-      var material = new THREE.MeshStandardMaterial({ color: 0xffffff });
-      loader.load(file, function (gltf) {
-        model = gltf.scene;
-        model.traverse(function (child) {
-          if (child.isMesh) {
-            child.material = material;
-          }
-        });
-        scene.add(model);
+function addGridHelper() {
+  const size = 10;
+  const divisions = 10;
+  const gridHelper = new THREE.GridHelper(size, divisions);
+  scene.add(gridHelper);
+}
+
+function render(time) {
+  time *= 0.001;  // convert time to seconds
+
+  controls.update();
+
+  renderer.render(scene, camera);
+
+  requestAnimationFrame(render);
+}
+
+function init() {
+  addLights();
+  addGridHelper();
+  const material = new THREE.MeshPhongMaterial({ color: 0x44aa88 });
+  addBoxToScene(material);
+
+  requestAnimationFrame(render);
+}
+
+init();
+
+// Upload file
+$('#file-input').on('change', function () {
+  var file = this.files[0];
+
+  var formData = new FormData();
+  formData.append('file', file);
+
+  // Display progress bar
+  $('#loading-bar').css('display', 'block');
+
+  $.ajax({
+    url: '/upload',
+    type: 'POST',
+    data: formData,
+    processData: false,
+    contentType: false,
+    xhr: function () {
+      var xhr = $.ajaxSettings.xhr();
+      xhr.upload.onprogress = function (e) {
+        var progress = (e.loaded / e.total) * 100;
+        $('#loading-bar .progress').css('width', progress + '%');
+      };
+      return xhr;
+    },
+    success: function (response) {
+      // Hide progress bar
+      $('#loading-bar').css('display', 'none');
+
+      // Load model into scene
+      const loader = new THREE.GLTFLoader();
+      loader.load(response.filepath, function (gltf) {
+        scene.add(gltf.scene);
       });
-
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth - 50, window.innerHeight - 50);
-      renderer.render(scene, camera);
-      iframeDoc.body.appendChild(renderer.domElement);
+    },
+    error: function (err) {
+      console.log(err);
     }
-
-    function animate() {
-      requestAnimationFrame(animate);
-      if (model) {
-        model.rotation.y += 0.01;
-      }
-      renderer.render(scene, camera);
-    }
-
-    init();
-    animate();
-  }
-
-  // Upload file
-  $('#upload-form').submit(function (e) {
-    e.preventDefault();
-    var formData = new FormData(this);
-
-    // Show loading bar
-    $('#loading-bar').addClass('progress');
-
-    $.ajax({
-      url: '/upload',
-      type: 'POST',
-      data: formData,
-      processData: false,
-      contentType: false,
-      xhr: function () {
-        var xhr = $.ajaxSettings.xhr();
-        xhr.upload.onprogress = function (e) {
-          var progress = (e.loaded / e.total) * 100;
-          $('#loading-bar .progress-bar').css('width', progress + '%');
-        };
-        return xhr;
-      },
-      success: function (data) {
-        // Hide loading bar
-        $('#loading-bar').removeClass('progress');
-        $('#loading-bar .progress-bar').css('width', '0%');
-
-        // Display 3D model
-        var fileURL = '/uploads/' + data.filename;
-        displayModel(fileURL);
-      },
-      error: function () {
-        alert('Error uploading file!');
-      },
-    });
   });
 });
-
 
