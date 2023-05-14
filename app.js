@@ -1,44 +1,63 @@
-const canvas = document.getElementById("canvas");
-const engine = new BABYLON.Engine(canvas, true);
+// Initialize variables
+var scene, camera, renderer;
+var mesh;
 
-// Create scene
-const createScene = async () => {
-  // Create a basic BJS Scene object
-  const scene = new BABYLON.Scene(engine);
+// Set up file input element
+var fileInput = document.getElementById('fileInput');
+fileInput.addEventListener('change', loadSTL);
 
-  // Create a FreeCamera, and set its position to (x:0, y:5, z:-10)
-  const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
+// Create a new scene and set background color
+scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
 
-  // Target the camera to scene origin
-  camera.setTarget(BABYLON.Vector3.Zero());
+// Create a new camera and set position
+camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 5;
 
-  // Attach the camera to the canvas
-  camera.attachControl(canvas, false);
+// Create a new renderer and set size
+renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
 
-  // Create a basic light, aiming 0,1,0 - meaning, to the sky
-  const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+// Add renderer element to DOM
+document.body.appendChild(renderer.domElement);
 
-  // Load 3D model
-  const assetUrl = "./models/nerf-gun.babylon";
-  const mesh = await BABYLON.SceneLoader.ImportMeshAsync("", assetUrl, "", scene);
+// Create a new orbit controls object
+var controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-  // Position the mesh
-  mesh.position = new BABYLON.Vector3(0, 0, 0);
+// Create a new directional light and add to scene
+var light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(0, 0, 1);
+scene.add(light);
 
-  // Scale the mesh
-  const scalingFactor = 0.05;
-  mesh.scaling = new BABYLON.Vector3(scalingFactor, scalingFactor, scalingFactor);
-
-  // Render loop
-  engine.runRenderLoop(() => {
-    scene.render();
+// Load STL file
+function loadSTL(event) {
+  var file = event.target.files[0];
+  var loader = new THREE.STLLoader();
+  
+  loader.load(URL.createObjectURL(file), function(geometry) {
+    // Create a new material and mesh from the geometry
+    var material = new THREE.MeshPhongMaterial({ color: 0xff5533, specular: 0x111111, shininess: 200 });
+    mesh = new THREE.Mesh(geometry, material);
+    
+    // Add mesh to scene
+    scene.add(mesh);
   });
-};
+}
 
-// Call createScene function
-createScene();
+// Render loop
+function animate() {
+  requestAnimationFrame(animate);
+  
+  // Rotate mesh
+  if (mesh) {
+    mesh.rotation.x += 0.01;
+    mesh.rotation.y += 0.01;
+  }
+  
+  // Update controls and render scene
+  controls.update();
+  renderer.render(scene, camera);
+}
 
-// Resize
-window.addEventListener("resize", () => {
-  engine.resize();
-});
+animate();
+
