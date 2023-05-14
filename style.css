@@ -1,127 +1,38 @@
-/* Reset */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html, body {
-  height: 100%;
-}
-
+/* Set background color and font */
 body {
-  background-color: #3c3c3c;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 16px;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
+  background-color: #000000;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 18px;
 }
 
+/* Style the title */
 h1 {
-  font-size: 3rem;
-  margin-bottom: 2rem;
+  color: #00ff00;
+  font-size: 48px;
   text-align: center;
+  margin-top: 50px;
+  margin-bottom: 50px;
 }
 
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 90%;
-  max-width: 960px;
-  height: 100%;
+/* Style the import button */
+.import-button {
+  display: block;
   margin: 0 auto;
-  background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1847291/neon-bg.png');
-  background-size: cover;
-  position: relative;
+  width: 200px;
+  height: 50px;
+  border: none;
+  border-radius: 5px;
+  background-color: #00ff00;
+  color: #000000;
+  font-size: 24px;
+  text-align: center;
+  cursor: pointer;
 }
 
+/* Style the canvas element */
 canvas {
   display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-/* Loader */
-#loader-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #333;
-  z-index: 1000;
-}
-
-#loader {
-  display: inline-block;
-  width: 60px;
-  height: 60px;
-  position: relative;
-  border: 4px solid #f2f2f2;
-  animation: loader 2s infinite ease;
-}
-
-.loader-section {
-  position: fixed;
-  top: 0;
-  width: 51%;
-  height: 100%;
-  background: #333;
-  z-index: 1000;
-}
-
-.loader-section.section-left {
-  left: 0;
-}
-
-.loader-section.section-right {
-  right: 0;
-}
-
-@keyframes loader {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Additional loader styles */
-#loader-wrapper.hide {
-  opacity: 0;
-  pointer-events: none;
-}
-
-#loader-wrapper .loader-section {
-  transition: transform 1s ease-in-out;
-}
-
-#loader-wrapper.hide .loader-section.section-left {
-  transform: translateX(-100%);
-}
-
-#loader-wrapper.hide .loader-section.section-right {
-  transform: translateX(100%);
+  margin: 0 auto;
+  border: 1px solid #00ff00;
+  border-radius: 5px;
 }
