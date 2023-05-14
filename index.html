@@ -1,35 +1,31 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>SLICK RICK NERF</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
-	<div class="container">
-		<h1>SLICK RICK NERF</h1>
-		<canvas id="canvas"></canvas>
-		<div id="loader-wrapper">
-			<div id="loader"></div>
-			<div class="loader-section section-left"></div>
-			<div class="loader-section section-right"></div>
-		</div>
-		<form id="model-form">
-			<div id="form-inputs">
-				<label for="model-url">Enter the URL of your 3D model file:</label>
-				<input type="text" id="model-url" name="modelUrl" placeholder="https://example.com/model.gltf">
-			</div>
-			<div id="form-buttons">
-				<button type="submit">Load Model</button>
-				<button type="button" id="cancel-button">Cancel</button>
-			</div>
-		</form>
-		<div id="viewport"></div>
-	</div>
-	<script src="https://cdn.babylonjs.com/babylon.js"></script>
-	<script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
-	<script src="app.js"></script>
-</body>
-</html>
+  <head>
+    <title>3D Viewer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: #000000;
+      }
 
+      #fileInput {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 999;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="file" id="fileInput" accept=".stl">
+    <script src="https://threejs.org/build/three.min.js"></script>
+    <script src="https://threejs.org/examples/js/loaders/STLLoader.js"></script>
+    <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+    <script src="utils.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
