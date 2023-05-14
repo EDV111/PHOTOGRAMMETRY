@@ -1,70 +1,73 @@
-const inputElement = document.getElementById("fileInput");
-const loadingElement = document.getElementById("loading");
-const progressBarElement = document.getElementById("progressBar");
-const canvasElement = document.getElementById("canvas");
-const gltfLoader = new THREE.GLTFLoader();
-const renderer = new THREE.WebGLRenderer({ canvas: canvasElement });
+// Wait for the DOM to be loaded before running the script
+document.addEventListener('DOMContentLoaded', () => {
+  // Get the necessary elements from the HTML document
+  const importButton = document.getElementById('import-button');
+  const glbInput = document.getElementById('glb-input');
+  const loadingBar = document.getElementById('loading-bar');
+  const processingBar = document.getElementById('processing-bar');
+  const viewerContainer = document.getElementById('viewer-container');
 
-function handleLoadProgress(xhr) {
-  if (xhr.lengthComputable) {
-    const percentComplete = (xhr.loaded / xhr.total) * 100;
-    progressBarElement.style.width = `${percentComplete}%`;
-  }
-}
+  // When the import button is clicked, trigger the file input dialog
+  importButton.addEventListener('click', () => {
+    glbInput.click();
+  });
 
-function handleLoadError(error) {
-  console.error(`Error loading model: ${error}`);
-}
+  // When a file is selected, process it and display the result in the viewer container
+  glbInput.addEventListener('change', async (event) => {
+    // Get the selected file
+    const glbFile = event.target.files[0];
 
-function handleLoadFinish(gltf) {
-  loadingElement.style.display = "none";
-  const object = gltf.scene;
-  const box = new THREE.Box3().setFromObject(object);
-  const center = box.getCenter(new THREE.Vector3());
-  const size = box.getSize(new THREE.Vector3());
-  const distance = Math.max(size.x, size.y, size.z) * 1.5;
-  object.position.x += (object.position.x - center.x) * -1;
-  object.position.y += (object.position.y - center.y) * -1;
-  object.position.z += (object.position.z - center.z) * -1;
-  camera.position.copy(center);
-  camera.position.z += distance;
-  camera.lookAt(center);
-  scene.add(object);
-}
+    // Display the loading bar
+    loadingBar.style.display = 'block';
 
-function handleInputChange(event) {
-  const file = event.target.files[0];
-  if (!file) {
-    return;
-  }
-  loadingElement.style.display = "block";
-  const url = URL.createObjectURL(file);
-  gltfLoader.load(url, handleLoadFinish, handleLoadProgress, handleLoadError);
-}
+    // Create a new instance of the GLTFLoader
+    const loader = new THREE.GLTFLoader();
 
-inputElement.addEventListener("change", handleInputChange);
+    // Load the GLB file
+    loader.load(URL.createObjectURL(glbFile), (gltf) => {
+      // Hide the loading bar
+      loadingBar.style.display = 'none';
 
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
-camera.position.z = 5;
+      // Display the processing bar
+      processingBar.style.display = 'block';
 
-const scene = new THREE.Scene();
+      // Position the camera so that the model is visible
+      const camera = new THREE.PerspectiveCamera(45, viewerContainer.offsetWidth / viewerContainer.offsetHeight, 1, 1000);
+      camera.position.set(0, 0, 5);
 
-const ambientLight = new THREE.AmbientLight(0xcccccc, 0.4);
-scene.add(ambientLight);
+      // Set up the renderer
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(viewerContainer.offsetWidth, viewerContainer.offsetHeight);
+      viewerContainer.appendChild(renderer.domElement);
 
-const pointLight = new THREE.PointLight(0xffffff, 0.8);
-camera.add(pointLight);
-scene.add(camera);
+      // Set up the scene
+      const scene = new THREE.Scene();
+      scene.add(gltf.scene);
+      scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+      scene.add(new THREE.DirectionalLight(0xffffff, 0.5));
 
-function render() {
-  requestAnimationFrame(render);
-  renderer.render(scene, camera);
-}
+      // Animate the model
+      const animate = () => {
+        requestAnimationFrame(animate);
 
-render();
+        gltf.scene.rotation.y += 0.01;
+
+        renderer.render(scene, camera);
+      };
+      animate();
+
+      // Hide the processing bar when the model has finished loading
+      processingBar.style.display = 'none';
+    }, (xhr) => {
+      // Update the progress bar while the model is loading
+      processingBar.value = xhr.loaded / xhr.total;
+    }, (error) => {
+      // Display an error message if the model fails to load
+      console.error(error);
+      alert('Failed to load GLB file. Please check the console for more information.');
+      loadingBar.style.display = 'none';
+    });
+  });
+});
+
 
