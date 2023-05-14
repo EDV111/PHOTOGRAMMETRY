@@ -1,0 +1,153 @@
+/* Global Styles */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Press Start 2P', sans-serif;
+    background-color: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+h1 {
+    text-align: center;
+    font-size: 5em;
+    margin-top: 0.5em;
+}
+
+.container {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+/* Main container */
+.container {
+	margin: 0 auto;
+	text-align: center;
+	padding: 2rem;
+	max-width: 960px;
+}
+
+/* Title */
+h1 {
+	font-family: 'Press Start 2P', cursive;
+	font-size: 4rem;
+	margin: 2rem 0;
+	color: #fff;
+	text-shadow: 3px 3px #000;
+	text-transform: uppercase;
+}
+
+/* Canvas */
+canvas {
+	width: 100%;
+	height: 50vh;
+	background-color: #3d3d3d;
+	margin: 2rem 0;
+	box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Upload button wrapper */
+#upload-btn-wrapper {
+	margin: 2rem 0;
+	position: relative;
+	overflow: hidden;
+	display: inline-block;
+}
+
+/* Upload button */
+.btn {
+	border: 2px solid #fff;
+	background-color: transparent;
+	color: #fff;
+	padding: 0.5rem 1.5rem;
+	font-size: 1.2rem;
+	font-weight: bold;
+	cursor: pointer;
+	outline: none;
+	transition: all 0.3s ease;
+}
+
+/* Upload button hover */
+.btn:hover {
+	background-color: #fff;
+	color: #000;
+}
+/*-------------------------------------*/
+/* LOADER                              */
+/*-------------------------------------*/
+
+#loader-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+}
+
+#loader {
+  display: block;
+  position: relative;
+  left: 50%;
+  top: 50%;
+  width: 150px;
+  height: 150px;
+  margin: -75px 0 0 -75px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #3498db;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+.loader-section {
+  position: fixed;
+  top: 0;
+  width: 51%;
+  height: 100%;
+  background: #222;
+  z-index: 1000;
+}
+
+.loader-section.section-left {
+  left: 0;
+}
+
+.loader-section.section-right {
+  right: 0;
+}
+
+/*-------------------------------------*/
+/* IMPORT BUTTON                       */
+/*-------------------------------------*/
+
+#upload-btn-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.btn {
+  display: inline-block;
+  background-color: #3498db;
+  border-radius: 8px;
+  padding: 10px 20px;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #3cba54;
+}
+
+#modelFile {
+  display: none;
+}
