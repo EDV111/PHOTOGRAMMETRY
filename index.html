@@ -1,95 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Slick Rick NERF</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.87/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.87/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <style>
     body {
-      background-color: black;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: Arial, sans-serif;
-      color: white;
+      background-color: #000000;
+      color: #ffffff;
+      font-family: 'Courier New', Courier, monospace;
+      text-align: center;
     }
+
     h1 {
-      font-size: 4rem;
-      margin: 0 0 1rem;
+      margin-top: 50px;
+      font-size: 40px;
     }
-    .dropzone {
-      border: 2px dashed white;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      margin-bottom: 2rem;
-      width: 50%;
-    }
-    .dropzone:hover {
-      border: 2px dashed gray;
-    }
-    .dropzone-label {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
-    .viewport-container {
-      width: 80%;
-      height: 600px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: gray;
-      position: relative;
-    }
-    .loading-bar {
-      height: 4px;
-      width: 100%;
-      background-color: white;
-      position: absolute;
-      bottom: 0;
-    }
-    .loading-progress {
-      height: 100%;
-      background-color: blue;
-    }
-    .loading-text {
-      font-size: 1.5rem;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-    button {
-      background-color: white;
+
+    #upload-btn {
+      background-color: #5CFF8A;
       border: none;
-      padding: 1rem 2rem;
-      font-size: 1.5rem;
+      color: #000000;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 20px;
+      margin: 50px;
       cursor: pointer;
-      margin-bottom: 2rem;
       border-radius: 10px;
     }
-    button:hover {
-      background-color: gray;
-      color: white;
+
+    #upload-btn:hover {
+      background-color: #00FF55;
+      transition: 0.3s;
+    }
+
+    #loading-bar-container {
+      display: none;
+      width: 50%;
+      margin: auto;
+      margin-top: 50px;
+      text-align: center;
+    }
+
+    #loading-bar {
+      width: 0%;
+      height: 20px;
+      background-color: #5CFF8A;
+      border-radius: 10px;
+      transition: 0.2s;
+    }
+
+    #loading-text {
+      font-size: 20px;
+      margin-top: 10px;
+    }
+
+    #viewport-container {
+      display: none;
+      width: 80%;
+      height: 600px;
+      margin: auto;
+      margin-top: 50px;
     }
   </style>
 </head>
 <body>
   <h1>Slick Rick NERF</h1>
-  <div class="dropzone">
-    <div class="dropzone-label">Drag and drop your file here or click to upload</div>
-    <input type="file" id="file-input" style="display: none;">
+
+  <button id="upload-btn">Import NERF File</button>
+
+  <div id="loading-bar-container">
+    <div id="loading-bar"></div>
+    <div id="loading-text">Uploading NERF file...</div>
   </div>
-  <div class="viewport-container">
-    <div class="loading-bar" id="loading-bar">
-      <div class="loading-progress" id="loading-progress"></div>
-    </div>
-    <div class="loading-text" id="loading-text"></div>
-    <canvas id="viewport"></canvas>
+
+  <div id="viewport-container">
+    <div id="cesiumContainer"></div>
   </div>
-  <button id="import-button">Import</button>
-  <script src="app.js"></script>
+
+  <script>
+    // Upload button
+    $('#upload-btn').on('click', function () {
+      $('<input/>').attr('type', 'file').on('change', function () {
+        var file = this.files[0];
+        var formData = new FormData();
+        formData.append('file', file);
+
+        // Show loading bar container
+        $('#loading-bar-container').show();
+
+        // Upload file
+        $.ajax({
+          url: '/upload',
+          type: 'POST',
+          data: formData,
+          processData: false,
+          contentType: false,
+          xhr: function () {
+            var xhr = $.ajaxSettings.xhr();
+            xhr.upload.onprogress = function (e) {
+              var progress = (e.loaded / e.total) * 100;
+              $('#loading-bar').css('width', progress + '%');
+            };
+            return xhr;
+          },
+          success: function (data) {
+        // Hide loading bar container
+        $('#loading-bar-container').hide();
+
+        // Show viewport container
+        $('#viewport-container').show();
+
+        // Initialize Cesium viewer
+        var viewer = new Cesium.Viewer('cesiumContainer', {
+          terrainProvider: Cesium.createWorldTerrain()
+        });
+
+        // Load NERF data
+        var dataSource = new Cesium.CzmlDataSource();
+        dataSource.load(data);
+        viewer.dataSources.add(dataSource);
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+      }
+    }).done(function () {
+      $(this).val('');
+    });
+  }).click();
+});
+  </script>
 </body>
 </html>
