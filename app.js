@@ -1,56 +1,77 @@
-// Variables
-let scene, camera, renderer, model;
+// Initialize variables
+let container;
+let camera;
+let scene;
+let renderer;
+let model;
+let loadingBar;
 
-// Initialization
 init();
 
-// Functions
 function init() {
+  // Create a container for the canvas
+  container = document.createElement("div");
+  container.classList.add("container");
+  document.body.appendChild(container);
+
+  // Create a loading bar
+  loadingBar = new LoadingBar(container);
+
+  // Create a camera
+  camera = new THREE.PerspectiveCamera(
+    45,
+    window.innerWidth / window.innerHeight,
+    0.25,
+    100
+  );
+  camera.position.set(-5, 3, 10);
+
   // Create a scene
   scene = new THREE.Scene();
 
-  // Create a camera
-  const fov = 75;
-  const aspect = window.innerWidth / window.innerHeight;
-  const near = 0.1;
-  const far = 1000;
-  camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.z = 5;
-
-  // Create a renderer
+  // Create a renderer and add it to the container
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
+  container.appendChild(renderer.domElement);
 
-  // Create a light
-  const light = new THREE.AmbientLight(0xffffff);
-  scene.add(light);
-
-  // Load the model
+  // Load the GLB file
   const loader = new THREE.GLTFLoader();
   loader.load(
-    // Resource URL
-    'ae1b9eb5e516c46b760028eb98bd7df979687af77ce8fb0117d06f6125ed0f12.glb',
-    // onLoad callback
-    function (gltf) {
+    "ae1b9eb5e516c46b760028eb98bd7df979687af77ce8fb0117d06f6125ed0f12.glb",
+    (gltf) => {
+      // Hide the loading bar
+      loadingBar.hide();
+
+      // Add the model to the scene
       model = gltf.scene;
       scene.add(model);
-      animate();
+
+      // Position the model in the center of the scene
+      const bbox = new THREE.Box3().setFromObject(model);
+      const center = bbox.getCenter(new THREE.Vector3());
+      model.position.sub(center);
+
+      // Render the scene
+      renderer.render(scene, camera);
     },
-    // onProgress callback
-    function (xhr) {
-      const loadingPercent = (xhr.loaded / xhr.total) * 100;
-      console.log(`Model loaded: ${loadingPercent}%`);
+    (progress) => {
+      // Update the loading bar
+      loadingBar.setProgress(progress.loaded / progress.total);
     },
-    // onError callback
-    function (error) {
-      console.error('Error loading model:', error);
+    (error) => {
+      console.error(error);
     }
   );
+
+  // Create a resize listener
+  window.addEventListener("resize", onWindowResize);
 }
 
-function animate() {
-  requestAnimationFrame(animate);
+function onWindowResize() {
+  // Update the camera aspect ratio and renderer size
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.render(scene, camera);
 }
 
