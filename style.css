@@ -1,34 +1,35 @@
 body {
-  background-color: black;
-  color: white;
+  background-color: #f0f0f0;
+  color: #333333;
   font-family: Arial, sans-serif;
-}
-
-header, main, footer {
-  padding: 20px;
+  margin: 0;
+  padding: 0;
 }
 
 header {
+  background-color: #333333;
+  padding: 20px;
   text-align: center;
 }
 
 h1 {
+  color: #ffffff;
   font-size: 24px;
-  margin-bottom: 10px;
+  margin: 0;
 }
 
-.slider-container {
-  width: 400px;
-  margin: 0 auto;
+main {
+  padding: 20px;
 }
 
-.weekly-program {
-  margin-top: 40px;
+h2 {
+  font-size: 20px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 20px;
 }
 
 th, td {
@@ -37,23 +38,22 @@ th, td {
 }
 
 th {
+  background-color: #cccccc;
   font-weight: bold;
 }
 
-td input[type="checkbox"] {
-  transform: scale(1.5);
+tr:nth-child(even) {
+  background-color: #f9f9f9;
 }
 
-.completed-days {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
+tr:hover {
+  background-color: #dddddd;
 }
 
-.day-marker {
-  width: 30px;
-  height: 30px;
-  background-color: white;
-  margin: 0 5px;
+td:nth-child(1) {
+  width: 80px;
+}
+
+td:nth-child(3) {
+  width: 100px;
 }
