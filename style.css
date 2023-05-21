@@ -22,27 +22,6 @@ h1 {
   margin: 0 auto;
 }
 
-.slider {
-  overflow: hidden;
-  height: 40px;
-  line-height: 40px;
-}
-
-.slide {
-  height: 40px;
-  white-space: nowrap;
-  animation: slide 10s infinite;
-}
-
-@keyframes slide {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(-100%);
-  }
-}
-
 .weekly-program {
   margin-top: 40px;
 }
@@ -77,5 +56,4 @@ td input[type="checkbox"] {
   height: 30px;
   background-color: white;
   margin: 0 5px;
-  /* Add animation styles here */
 }
