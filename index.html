@@ -1,28 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Fitness Journey</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>My Fitness Website</title>
 </head>
 <body>
-    <div class="container">
-        <h1 class="header">Daily Inspiration</h1>
-        <p class="quote">"Insert daily inspiration quote here"</p>
-        <div class="weekly-program">
-            <div class="day">
-                <input type="checkbox" id="monday">
-                <label for="monday">Monday</label>
-            </div>
-            <!-- Repeat the above structure for each day of the week -->
-        </div>
-        <div class="checkmark-container">
-            <div class="checkmark">
-                <div class="checkmark-circle"></div>
-                <div class="checkmark-stem"></div>
-                <div class="checkmark-kick"></div>
-            </div>
-        </div>
+  <header>
+    <h1>Motivational Quotes</h1>
+    <div class="slider-container">
+      <div class="slider">
+        <div class="slide">Quote 1</div>
+        <div class="slide">Quote 2</div>
+        <div class="slide">Quote 3</div>
+        <!-- Add more slides with quotes -->
+      </div>
     </div>
-    <script src="script.js"></script>
+  </header>
+
+  <main>
+    <div class="weekly-program">
+      <h2>Weekly Program</h2>
+      <table>
+        <tr>
+          <th>Day</th>
+          <th>Workout</th>
+          <th>Duration</th>
+          <th>Check</th>
+        </tr>
+        <tr>
+          <td>Monday</td>
+          <td>Strength Training</td>
+          <td>60 minutes</td>
+          <td><input type="checkbox"></td>
+        </tr>
+        <tr>
+          <td>Tuesday</td>
+          <td>Cardio</td>
+          <td>30 minutes</td>
+          <td><input type="checkbox"></td>
+        </tr>
+        <!-- Add more rows for each day -->
+      </table>
+    </div>
+  </main>
+
+  <footer>
+    <div class="completed-days">
+      <h3>Completed Days:</h3>
+      <div class="day-marker"></div>
+      <!-- Add more day markers for each completed day -->
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
