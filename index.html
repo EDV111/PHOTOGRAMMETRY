@@ -1,23 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Slick Rick NERF</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+    <title>My Fitness Journey</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-  <h1>Slick Rick NERF</h1>
-  
-  <div id="loader">
-    <input type="file" id="file-input" accept=".glb" onchange="loadModel()">
-    <label for="file-input">Import</label>
-  </div>
-
-  <div id="model-container"></div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="app.js"></script>
+    <div class="container">
+        <h1 class="header">Daily Inspiration</h1>
+        <p class="quote">"Insert daily inspiration quote here"</p>
+        <div class="weekly-program">
+            <div class="day">
+                <input type="checkbox" id="monday">
+                <label for="monday">Monday</label>
+            </div>
+            <!-- Repeat the above structure for each day of the week -->
+        </div>
+        <div class="checkmark-container">
+            <div class="checkmark">
+                <div class="checkmark-circle"></div>
+                <div class="checkmark-stem"></div>
+                <div class="checkmark-kick"></div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
 
