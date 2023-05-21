@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
   ];
 
   const quoteContainer = document.querySelector('.slider');
-  
+
   quotes.forEach(function(quote) {
     const slide = document.createElement('div');
     slide.classList.add('slide');
