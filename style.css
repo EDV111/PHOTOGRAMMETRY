@@ -1,93 +1,60 @@
 body {
-    background-color: black;
-    color: white;
-    font-family: Arial, sans-serif;
+  background-color: black;
+  color: white;
+  font-family: Arial, sans-serif;
 }
 
-.container {
-    width: 80%;
-    margin: 0 auto;
-    text-align: center;
-    padding: 20px;
+header, main, footer {
+  padding: 20px;
 }
 
-.header {
-    font-size: 24px;
+header {
+  text-align: center;
 }
 
-.quote {
-    font-size: 18px;
-    font-style: italic;
-    margin-bottom: 20px;
+h1 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.slider-container {
+  width: 400px;
+  margin: 0 auto;
 }
 
 .weekly-program {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
+  margin-top: 40px;
 }
 
-.day {
-    margin: 10px;
-    text-align: center;
+table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-input[type="checkbox"] {
-    display: none;
+th, td {
+  padding: 10px;
+  text-align: left;
 }
 
-input[type="checkbox"] + label:before {
-    content: "\2713"; /* Checkmark symbol */
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 1px solid #fff;
-    background-color: #fff;
-    color: #000;
+th {
+  font-weight: bold;
 }
 
-input[type="checkbox"]:checked + label:before {
-    background-color: green;
-    color: #fff;
+td input[type="checkbox"] {
+  transform: scale(1.5);
 }
 
-.checkmark-container {
-    margin-top: 20px;
+.completed-days {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
 }
 
-.checkmark {
-    display: none;
-    width: 50px;
-    height: 50px;
-    position: relative;
-}
-
-.checkmark-circle {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 2px solid green;
-    position: absolute;
-    box-sizing: border-box;
-}
-
-.checkmark-stem {
-    width: 15px;
-    height: 30px;
-    background-color: green;
-    position: absolute;
-    top: 10px;
-    left: 22px;
-    transform: rotate(45deg);
-}
-
-.checkmark-kick {
-    width: 10px;
-    height: 10px;
-    background-color: green;
-    position: absolute;
-    top: 36px;
-    left: 17px;
-    transform: rotate(45deg);
+.day-marker {
+  width: 30px;
+  height: 30px;
+  background-color: white;
+  margin: 0 5px;
+  /* Add animation styles here */
 }
